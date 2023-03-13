@@ -37,10 +37,10 @@
  *
  */
 // *****************************************************************************
-/* EXAMPLE_START(a2dp_sink_demo): A2DP Sink - Receive Audio Stream and Control
+/* EXAMPLE_START(a2dp_sink_arduino): A2DP Sink - Receive Audio Stream and Control
  * Playback
  *
- * @text This A2DP Sink example demonstrates how to use the A2DP Sink service to
+ * @text This A2DP Sink example arduinonstrates how to use the A2DP Sink service to
  * receive an audio data stream from a remote A2DP Source device. In addition,
  * the AVRCP Controller is used to get information on currently played media,
  * such are title, artist and album, as well as to control the playback,
@@ -48,7 +48,7 @@
  * the console to show the available AVDTP and AVRCP commands.
  *
  * @text To test with a remote device, e.g. a mobile phone,
- * pair from the remote device with the demo, then start playing music on the
+ * pair from the remote device with the arduino, then start playing music on the
  * remote device. Alternatively, set the device_addr_string to the Bluetooth
  * address of your remote device in the code, and call connect from the UI.
  *
@@ -58,7 +58,7 @@
  *
  */
 // *****************************************************************************
-#include "A2DPCommon.h"
+#include "A2DPCommonRP2040.h"
 #include "AudioTools.h"
 #include "AudioCodecs/CodecSBC.h"
 #include <stdint.h>
@@ -118,7 +118,7 @@ public:
   void end() {
     TRACEI();
     stop();
-    a2dp_sink_disconnect(a2dp_sink_demo_avrcp_connection.avrcp_cid);
+    a2dp_sink_disconnect(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
     dec_stream.end();
   }
 
@@ -126,35 +126,35 @@ public:
   bool play() {
     TRACEI();
     return 0 ==
-           avrcp_controller_play(a2dp_sink_demo_avrcp_connection.avrcp_cid);
+           avrcp_controller_play(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
   }
 
   /// avrcp stop
   bool stop() {
     TRACEI();
     return 0 ==
-           avrcp_controller_stop(a2dp_sink_demo_avrcp_connection.avrcp_cid);
+           avrcp_controller_stop(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
   }
 
   /// avrcp pause
   bool pause() {
     TRACEI();
     return 0 ==
-           avrcp_controller_pause(a2dp_sink_demo_avrcp_connection.avrcp_cid);
+           avrcp_controller_pause(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
   }
 
   /// avrcp forward
   bool next() {
     TRACEI();
     return 0 ==
-           avrcp_controller_forward(a2dp_sink_demo_avrcp_connection.avrcp_cid);
+           avrcp_controller_forward(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
   }
 
   /// avrcp backward
   bool previous() {
     TRACEI();
     return 0 ==
-           avrcp_controller_backward(a2dp_sink_demo_avrcp_connection.avrcp_cid);
+           avrcp_controller_backward(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
   }
 
   /// avrcp fast_forwar
@@ -162,10 +162,10 @@ public:
     TRACEI();
     if (start) {
       return 0 == avrcp_controller_press_and_hold_fast_forward(
-                      a2dp_sink_demo_avrcp_connection.avrcp_cid);
+                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
     } else {
       return 0 == avrcp_controller_release_press_and_hold_cmd(
-                      a2dp_sink_demo_avrcp_connection.avrcp_cid);
+                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
     }
   }
 
@@ -174,11 +174,11 @@ public:
     TRACEI();
     if (start) {
       return 0 == avrcp_controller_press_and_hold_rewind(
-                      a2dp_sink_demo_avrcp_connection.avrcp_cid);
+                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
 
     } else {
       return 0 == avrcp_controller_release_press_and_hold_cmd(
-                      a2dp_sink_demo_avrcp_connection.avrcp_cid);
+                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
     }
   }
 
@@ -194,7 +194,7 @@ public:
     }
     int volume = volume_percentage * 127 / 100;
     int status = avrcp_target_volume_changed(
-        a2dp_sink_demo_avrcp_connection.avrcp_cid, volume);
+        a2dp_sink_arduino_avrcp_connection.avrcp_cid, volume);
     avrcp_volume_changed(volume);
     return status == 0;
   }
@@ -286,24 +286,24 @@ protected:
     STREAM_STATE_PAUSED,
   };
 
-  struct a2dp_sink_demo_stream_endpoint_t {
+  struct a2dp_sink_arduino_stream_endpoint_t {
     uint8_t a2dp_local_seid;
     uint8_t media_sbc_codec_configuration[4];
-  } a2dp_sink_demo_stream_endpoint;
+  } a2dp_sink_arduino_stream_endpoint;
 
-  struct a2dp_sink_demo_a2dp_connection_t {
+  struct a2dp_sink_arduino_a2dp_connection_t {
     bd_addr_t addr;
     uint16_t a2dp_cid;
     uint8_t a2dp_local_seid;
     stream_state_t stream_state;
     media_codec_configuration_sbc_t sbc_configuration;
-  } a2dp_sink_demo_a2dp_connection;
+  } a2dp_sink_arduino_a2dp_connection;
 
-  struct a2dp_sink_demo_avrcp_connection_t {
+  struct a2dp_sink_arduino_avrcp_connection_t {
     bd_addr_t addr;
     uint16_t avrcp_cid;
     bool playing;
-  } a2dp_sink_demo_avrcp_connection;
+  } a2dp_sink_arduino_avrcp_connection;
 
   /* @section Main Application Setup
    *
@@ -358,8 +358,8 @@ protected:
     a2dp_sink_register_media_handler(&sink_handle_l2cap_media_data_packet);
 
     // Create stream endpoint
-    a2dp_sink_demo_stream_endpoint_t *stream_endpoint =
-        &a2dp_sink_demo_stream_endpoint;
+    a2dp_sink_arduino_stream_endpoint_t *stream_endpoint =
+        &a2dp_sink_arduino_stream_endpoint;
     avdtp_stream_endpoint_t *local_stream_endpoint =
         a2dp_sink_create_stream_endpoint(
             AVDTP_AUDIO, AVDTP_CODEC_SBC, media_sbc_codec_capabilities,
@@ -432,7 +432,7 @@ protected:
     // Set local name with a template Bluetooth address, that will be
     // automatically replaced with an actual address once it is available,
     // i.e. when BTstack boots up and starts talking to a Bluetooth module.
-    gap_set_local_name("A2DP Sink Demo 00:00:00:00:00:00");
+    gap_set_local_name("A2DP Sink arduino 00:00:00:00:00:00");
 
     // allot to show up in Bluetooth inquiry
     gap_discoverable_control(1);
@@ -702,8 +702,8 @@ protected:
     uint8_t status;
     bd_addr_t address;
 
-    a2dp_sink_demo_avrcp_connection_t *connection =
-        &a2dp_sink_demo_avrcp_connection;
+    a2dp_sink_arduino_avrcp_connection_t *connection =
+        &a2dp_sink_arduino_avrcp_connection;
 
     if (packet_type != HCI_EVENT_PACKET)
       return;
@@ -764,8 +764,8 @@ protected:
     uint8_t avrcp_subevent_value[256];
     uint8_t play_status;
 
-    a2dp_sink_demo_avrcp_connection_t *avrcp_connection =
-        &a2dp_sink_demo_avrcp_connection;
+    a2dp_sink_arduino_avrcp_connection_t *avrcp_connection =
+        &a2dp_sink_arduino_avrcp_connection;
 
     if (packet_type != HCI_EVENT_PACKET)
       return;
@@ -993,8 +993,8 @@ protected:
     if (hci_event_packet_get_type(packet) != HCI_EVENT_A2DP_META)
       return;
 
-    a2dp_sink_demo_a2dp_connection_t *a2dp_conn =
-        &a2dp_sink_demo_a2dp_connection;
+    a2dp_sink_arduino_a2dp_connection_t *a2dp_conn =
+        &a2dp_sink_arduino_a2dp_connection;
 
     switch (packet[2]) {
     case A2DP_SUBEVENT_SIGNALING_MEDIA_CODEC_OTHER_CONFIGURATION:
@@ -1184,12 +1184,12 @@ protected:
     uint8_t volume;
     avrcp_battery_status_t old_battery_status;
 
-    a2dp_sink_demo_stream_endpoint_t *stream_endpoint =
-        &a2dp_sink_demo_stream_endpoint;
-    a2dp_sink_demo_a2dp_connection_t *a2dp_connection =
-        &a2dp_sink_demo_a2dp_connection;
-    a2dp_sink_demo_avrcp_connection_t *avrcp_connection =
-        &a2dp_sink_demo_avrcp_connection;
+    a2dp_sink_arduino_stream_endpoint_t *stream_endpoint =
+        &a2dp_sink_arduino_stream_endpoint;
+    a2dp_sink_arduino_a2dp_connection_t *a2dp_connection =
+        &a2dp_sink_arduino_a2dp_connection;
+    a2dp_sink_arduino_avrcp_connection_t *avrcp_connection =
+        &a2dp_sink_arduino_avrcp_connection;
 
     switch (cmd) {
     case 'b':

@@ -38,10 +38,10 @@
  */
 
 // *****************************************************************************
-/* EXAMPLE_START(a2dp_source_demo): A2DP Source - Stream Audio and Control
+/* EXAMPLE_START(a2dp_source_arduino): A2DP Source - Stream Audio and Control
  * Volume
  *
- * @text This A2DP Source example demonstrates how to send an audio data stream
+ * @text This A2DP Source example arduinonstrates how to send an audio data stream
  * to a remote A2DP Sink device and how to switch between two audio data
  * sources. In addition, the AVRCP Target is used to answer queries on currently
  * played media, as well as to handle remote playback control, i.e. play, stop,
@@ -58,7 +58,7 @@
  *
  */
 // *****************************************************************************
-#include "A2DPCommon.h"
+#include "A2DPCommonRP2040.h"
 #include "AudioCodecs/CodecSBC.h"
 #include "AudioTools.h"
 
@@ -142,7 +142,7 @@ protected:
             // AVDTP_SBC_ALLOCATION_METHOD_LOUDNESS,
       2, 53};
 
-  const int A2DP_SOURCE_DEMO_INQUIRY_DURATION_1280MS = 12;
+  const int A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS = 12;
 
   struct media_codec_configuration_sbc_t {
     int reconfigure;
@@ -377,7 +377,7 @@ protected:
     return sbc_encoder.frameLength();
   }
 
-  void a2dp_demo_send_media_packet(void) {
+  void a2dp_arduino_send_media_packet(void) {
     TRACED();
     int num_bytes_in_frame = sbc_buffer_length();
     int bytes_in_storage = media_tracker.sbc_storage_count;
@@ -416,7 +416,7 @@ protected:
 #endif
   }
 
-  int a2dp_demo_fill_sbc_audio_buffer(a2dp_media_sending_context_t *context) {
+  int a2dp_arduino_fill_sbc_audio_buffer(a2dp_media_sending_context_t *context) {
     TRACED();
     int total_num_bytes_read = 0;
     unsigned int num_audio_samples_per_sbc_buffer = sbc_buffer_length();
@@ -469,7 +469,7 @@ protected:
     if (context->sbc_ready_to_send)
       return;
 
-    a2dp_demo_fill_sbc_audio_buffer(context);
+    a2dp_arduino_fill_sbc_audio_buffer(context);
 
     if ((context->sbc_storage_count + sbc_buffer_length()) >
         context->max_media_payload_size) {
@@ -480,7 +480,7 @@ protected:
     }
   }
 
-  void a2dp_demo_timer_start(a2dp_media_sending_context_t *context) {
+  void a2dp_arduino_timer_start(a2dp_media_sending_context_t *context) {
     TRACED();
     context->max_media_payload_size = btstack_min(
         a2dp_max_media_payload_size(context->a2dp_cid, context->local_seid),
@@ -496,7 +496,7 @@ protected:
     btstack_run_loop_add_timer(&context->audio_timer);
   }
 
-  void a2dp_demo_timer_stop(a2dp_media_sending_context_t *context) {
+  void a2dp_arduino_timer_stop(a2dp_media_sending_context_t *context) {
     TRACED();
     context->time_audio_data_sent = 0;
     context->acc_num_missed_samples = 0;
@@ -520,10 +520,10 @@ protected:
            configuration->max_bitpool_value);
   }
 
-  void a2dp_source_demo_start_scanning(void) {
+  void a2dp_source_arduino_start_scanning(void) {
     TRACED();
     printf("Start scanning...\n");
-    gap_inquiry_start(A2DP_SOURCE_DEMO_INQUIRY_DURATION_1280MS);
+    gap_inquiry_start(A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS);
     scan_active = true;
   }
 
@@ -548,7 +548,7 @@ protected:
     case BTSTACK_EVENT_STATE:
       if (btstack_event_state_get_state(packet) != HCI_STATE_WORKING)
         return;
-      a2dp_source_demo_start_scanning();
+      a2dp_source_arduino_start_scanning();
       break;
 #endif
     case HCI_EVENT_PIN_CODE_REQUEST:
@@ -587,7 +587,7 @@ protected:
     case GAP_EVENT_INQUIRY_COMPLETE:
       if (scan_active) {
         printf("No Bluetooth speakers found, scanning again...\n");
-        gap_inquiry_start(A2DP_SOURCE_DEMO_INQUIRY_DURATION_1280MS);
+        gap_inquiry_start(A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS);
       }
       break;
     default:
@@ -800,7 +800,7 @@ protected:
         avrcp_target_set_playback_status(media_tracker.avrcp_cid,
                                          AVRCP_PLAYBACK_STATUS_PLAYING);
       }
-      a2dp_demo_timer_start(&media_tracker);
+      a2dp_arduino_timer_start(&media_tracker);
       printf("A2DP Source: Stream started, a2dp_cid 0x%02x, local_seid "
              "0x%02x\n",
              cid, local_seid);
@@ -812,7 +812,7 @@ protected:
               packet);
       cid = a2dp_subevent_signaling_media_codec_sbc_configuration_get_a2dp_cid(
           packet);
-      a2dp_demo_send_media_packet();
+      a2dp_arduino_send_media_packet();
       break;
 
     case A2DP_SUBEVENT_STREAM_SUSPENDED:
@@ -828,7 +828,7 @@ protected:
              "0x%02x\n",
              cid, local_seid);
 
-      a2dp_demo_timer_stop(&media_tracker);
+      a2dp_arduino_timer_stop(&media_tracker);
       break;
 
     case A2DP_SUBEVENT_STREAM_RELEASED:
@@ -851,7 +851,7 @@ protected:
         avrcp_target_set_playback_status(media_tracker.avrcp_cid,
                                          AVRCP_PLAYBACK_STATUS_STOPPED);
       }
-      a2dp_demo_timer_stop(&media_tracker);
+      a2dp_arduino_timer_stop(&media_tracker);
       break;
     case A2DP_SUBEVENT_SIGNALING_CONNECTION_RELEASED:
       cid = a2dp_subevent_signaling_connection_released_get_a2dp_cid(packet);
@@ -1040,7 +1040,7 @@ protected:
     TRACED();
     bd_addr_t iut_address;
     gap_local_bd_addr(iut_address);
-    printf("\n--- Bluetooth  A2DP Source/AVRCP Demo %s ---\n",
+    printf("\n--- Bluetooth  A2DP Source/AVRCP arduino %s ---\n",
            bd_addr_to_str(iut_address));
     printf("a      - Scan for Bluetooth speaker and connect\n");
     printf("b      - A2DP Source create connection to addr %s\n",
@@ -1070,7 +1070,7 @@ protected:
     uint8_t status = ERROR_CODE_SUCCESS;
     switch (cmd) {
     case 'a':
-      a2dp_source_demo_start_scanning();
+      a2dp_source_arduino_start_scanning();
       break;
     case 'b':
       status =

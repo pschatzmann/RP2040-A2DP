@@ -116,10 +116,10 @@ $(function() {
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span><span class="comment">// *****************************************************************************</span></div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">/* EXAMPLE_START(a2dp_source_demo): A2DP Source - Stream Audio and Control</span></div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span><span class="comment">/* EXAMPLE_START(a2dp_source_arduino): A2DP Source - Stream Audio and Control</span></div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="comment"> * Volume</span></div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span><span class="comment"> *</span></div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment"> * @text This A2DP Source example demonstrates how to send an audio data stream</span></div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="comment"> * @text This A2DP Source example arduinonstrates how to send an audio data stream</span></div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span><span class="comment"> * to a remote A2DP Sink device and how to switch between two audio data</span></div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment"> * sources. In addition, the AVRCP Target is used to answer queries on currently</span></div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="comment"> * played media, as well as to handle remote playback control, i.e. play, stop,</span></div>
@@ -216,7 +216,7 @@ $(function() {
 <div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>            <span class="comment">// AVDTP_SBC_ALLOCATION_METHOD_LOUDNESS,</span></div>
 <div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>      2, 53};</div>
 <div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> A2DP_SOURCE_DEMO_INQUIRY_DURATION_1280MS = 12;</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS = 12;</div>
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
 <div class="line"><a id="l00147" name="l00147"></a><span class="lineno"><a class="line" href="structa2dp__rp2040_1_1_a2_d_p_source_class_1_1media__codec__configuration__sbc__t.html">  147</a></span>  <span class="keyword">struct </span><a class="code hl_struct" href="structa2dp__rp2040_1_1_a2_d_p_source_class_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a> {</div>
 <div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    <span class="keywordtype">int</span> reconfigure;</div>
@@ -451,7 +451,7 @@ $(function() {
 <div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>    <span class="keywordflow">return</span> sbc_encoder.frameLength();</div>
 <div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>  }</div>
 <div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span> </div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>  <span class="keywordtype">void</span> a2dp_demo_send_media_packet(<span class="keywordtype">void</span>) {</div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>  <span class="keywordtype">void</span> a2dp_arduino_send_media_packet(<span class="keywordtype">void</span>) {</div>
 <div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>    TRACED();</div>
 <div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>    <span class="keywordtype">int</span> num_bytes_in_frame = sbc_buffer_length();</div>
 <div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>    <span class="keywordtype">int</span> bytes_in_storage = media_tracker.sbc_storage_count;</div>
@@ -490,7 +490,7 @@ $(function() {
 <div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>  }</div>
 <div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span> </div>
-<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>  <span class="keywordtype">int</span> a2dp_demo_fill_sbc_audio_buffer(a2dp_media_sending_context_t *context) {</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>  <span class="keywordtype">int</span> a2dp_arduino_fill_sbc_audio_buffer(a2dp_media_sending_context_t *context) {</div>
 <div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span>    TRACED();</div>
 <div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span>    <span class="keywordtype">int</span> total_num_bytes_read = 0;</div>
 <div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> num_audio_samples_per_sbc_buffer = sbc_buffer_length();</div>
@@ -543,7 +543,7 @@ $(function() {
 <div class="line"><a id="l00469" name="l00469"></a><span class="lineno">  469</span>    <span class="keywordflow">if</span> (context-&gt;sbc_ready_to_send)</div>
 <div class="line"><a id="l00470" name="l00470"></a><span class="lineno">  470</span>      <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00471" name="l00471"></a><span class="lineno">  471</span> </div>
-<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>    a2dp_demo_fill_sbc_audio_buffer(context);</div>
+<div class="line"><a id="l00472" name="l00472"></a><span class="lineno">  472</span>    a2dp_arduino_fill_sbc_audio_buffer(context);</div>
 <div class="line"><a id="l00473" name="l00473"></a><span class="lineno">  473</span> </div>
 <div class="line"><a id="l00474" name="l00474"></a><span class="lineno">  474</span>    <span class="keywordflow">if</span> ((context-&gt;sbc_storage_count + sbc_buffer_length()) &gt;</div>
 <div class="line"><a id="l00475" name="l00475"></a><span class="lineno">  475</span>        context-&gt;max_media_payload_size) {</div>
@@ -554,7 +554,7 @@ $(function() {
 <div class="line"><a id="l00480" name="l00480"></a><span class="lineno">  480</span>    }</div>
 <div class="line"><a id="l00481" name="l00481"></a><span class="lineno">  481</span>  }</div>
 <div class="line"><a id="l00482" name="l00482"></a><span class="lineno">  482</span> </div>
-<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>  <span class="keywordtype">void</span> a2dp_demo_timer_start(a2dp_media_sending_context_t *context) {</div>
+<div class="line"><a id="l00483" name="l00483"></a><span class="lineno">  483</span>  <span class="keywordtype">void</span> a2dp_arduino_timer_start(a2dp_media_sending_context_t *context) {</div>
 <div class="line"><a id="l00484" name="l00484"></a><span class="lineno">  484</span>    TRACED();</div>
 <div class="line"><a id="l00485" name="l00485"></a><span class="lineno">  485</span>    context-&gt;max_media_payload_size = btstack_min(</div>
 <div class="line"><a id="l00486" name="l00486"></a><span class="lineno">  486</span>        a2dp_max_media_payload_size(context-&gt;a2dp_cid, context-&gt;local_seid),</div>
@@ -570,7 +570,7 @@ $(function() {
 <div class="line"><a id="l00496" name="l00496"></a><span class="lineno">  496</span>    btstack_run_loop_add_timer(&amp;context-&gt;audio_timer);</div>
 <div class="line"><a id="l00497" name="l00497"></a><span class="lineno">  497</span>  }</div>
 <div class="line"><a id="l00498" name="l00498"></a><span class="lineno">  498</span> </div>
-<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span>  <span class="keywordtype">void</span> a2dp_demo_timer_stop(a2dp_media_sending_context_t *context) {</div>
+<div class="line"><a id="l00499" name="l00499"></a><span class="lineno">  499</span>  <span class="keywordtype">void</span> a2dp_arduino_timer_stop(a2dp_media_sending_context_t *context) {</div>
 <div class="line"><a id="l00500" name="l00500"></a><span class="lineno">  500</span>    TRACED();</div>
 <div class="line"><a id="l00501" name="l00501"></a><span class="lineno">  501</span>    context-&gt;time_audio_data_sent = 0;</div>
 <div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span>    context-&gt;acc_num_missed_samples = 0;</div>
@@ -594,10 +594,10 @@ $(function() {
 <div class="line"><a id="l00520" name="l00520"></a><span class="lineno">  520</span>           configuration-&gt;max_bitpool_value);</div>
 <div class="line"><a id="l00521" name="l00521"></a><span class="lineno">  521</span>  }</div>
 <div class="line"><a id="l00522" name="l00522"></a><span class="lineno">  522</span> </div>
-<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>  <span class="keywordtype">void</span> a2dp_source_demo_start_scanning(<span class="keywordtype">void</span>) {</div>
+<div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>  <span class="keywordtype">void</span> a2dp_source_arduino_start_scanning(<span class="keywordtype">void</span>) {</div>
 <div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span>    TRACED();</div>
 <div class="line"><a id="l00525" name="l00525"></a><span class="lineno">  525</span>    printf(<span class="stringliteral">&quot;Start scanning...\n&quot;</span>);</div>
-<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>    gap_inquiry_start(A2DP_SOURCE_DEMO_INQUIRY_DURATION_1280MS);</div>
+<div class="line"><a id="l00526" name="l00526"></a><span class="lineno">  526</span>    gap_inquiry_start(A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS);</div>
 <div class="line"><a id="l00527" name="l00527"></a><span class="lineno">  527</span>    scan_active = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00528" name="l00528"></a><span class="lineno">  528</span>  }</div>
 <div class="line"><a id="l00529" name="l00529"></a><span class="lineno">  529</span> </div>
@@ -622,7 +622,7 @@ $(function() {
 <div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>    <span class="keywordflow">case</span> BTSTACK_EVENT_STATE:</div>
 <div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>      <span class="keywordflow">if</span> (btstack_event_state_get_state(packet) != HCI_STATE_WORKING)</div>
 <div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>      a2dp_source_demo_start_scanning();</div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>      a2dp_source_arduino_start_scanning();</div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>    <span class="keywordflow">case</span> HCI_EVENT_PIN_CODE_REQUEST:</div>
@@ -661,7 +661,7 @@ $(function() {
 <div class="line"><a id="l00587" name="l00587"></a><span class="lineno">  587</span>    <span class="keywordflow">case</span> GAP_EVENT_INQUIRY_COMPLETE:</div>
 <div class="line"><a id="l00588" name="l00588"></a><span class="lineno">  588</span>      <span class="keywordflow">if</span> (scan_active) {</div>
 <div class="line"><a id="l00589" name="l00589"></a><span class="lineno">  589</span>        printf(<span class="stringliteral">&quot;No Bluetooth speakers found, scanning again...\n&quot;</span>);</div>
-<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>        gap_inquiry_start(A2DP_SOURCE_DEMO_INQUIRY_DURATION_1280MS);</div>
+<div class="line"><a id="l00590" name="l00590"></a><span class="lineno">  590</span>        gap_inquiry_start(A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS);</div>
 <div class="line"><a id="l00591" name="l00591"></a><span class="lineno">  591</span>      }</div>
 <div class="line"><a id="l00592" name="l00592"></a><span class="lineno">  592</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00593" name="l00593"></a><span class="lineno">  593</span>    <span class="keywordflow">default</span>:</div>
@@ -874,7 +874,7 @@ $(function() {
 <div class="line"><a id="l00800" name="l00800"></a><span class="lineno">  800</span>        avrcp_target_set_playback_status(media_tracker.avrcp_cid,</div>
 <div class="line"><a id="l00801" name="l00801"></a><span class="lineno">  801</span>                                         AVRCP_PLAYBACK_STATUS_PLAYING);</div>
 <div class="line"><a id="l00802" name="l00802"></a><span class="lineno">  802</span>      }</div>
-<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>      a2dp_demo_timer_start(&amp;media_tracker);</div>
+<div class="line"><a id="l00803" name="l00803"></a><span class="lineno">  803</span>      a2dp_arduino_timer_start(&amp;media_tracker);</div>
 <div class="line"><a id="l00804" name="l00804"></a><span class="lineno">  804</span>      printf(<span class="stringliteral">&quot;A2DP Source: Stream started, a2dp_cid 0x%02x, local_seid &quot;</span></div>
 <div class="line"><a id="l00805" name="l00805"></a><span class="lineno">  805</span>             <span class="stringliteral">&quot;0x%02x\n&quot;</span>,</div>
 <div class="line"><a id="l00806" name="l00806"></a><span class="lineno">  806</span>             cid, local_seid);</div>
@@ -886,7 +886,7 @@ $(function() {
 <div class="line"><a id="l00812" name="l00812"></a><span class="lineno">  812</span>              packet);</div>
 <div class="line"><a id="l00813" name="l00813"></a><span class="lineno">  813</span>      cid = a2dp_subevent_signaling_media_codec_sbc_configuration_get_a2dp_cid(</div>
 <div class="line"><a id="l00814" name="l00814"></a><span class="lineno">  814</span>          packet);</div>
-<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>      a2dp_demo_send_media_packet();</div>
+<div class="line"><a id="l00815" name="l00815"></a><span class="lineno">  815</span>      a2dp_arduino_send_media_packet();</div>
 <div class="line"><a id="l00816" name="l00816"></a><span class="lineno">  816</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00817" name="l00817"></a><span class="lineno">  817</span> </div>
 <div class="line"><a id="l00818" name="l00818"></a><span class="lineno">  818</span>    <span class="keywordflow">case</span> A2DP_SUBEVENT_STREAM_SUSPENDED:</div>
@@ -902,7 +902,7 @@ $(function() {
 <div class="line"><a id="l00828" name="l00828"></a><span class="lineno">  828</span>             <span class="stringliteral">&quot;0x%02x\n&quot;</span>,</div>
 <div class="line"><a id="l00829" name="l00829"></a><span class="lineno">  829</span>             cid, local_seid);</div>
 <div class="line"><a id="l00830" name="l00830"></a><span class="lineno">  830</span> </div>
-<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>      a2dp_demo_timer_stop(&amp;media_tracker);</div>
+<div class="line"><a id="l00831" name="l00831"></a><span class="lineno">  831</span>      a2dp_arduino_timer_stop(&amp;media_tracker);</div>
 <div class="line"><a id="l00832" name="l00832"></a><span class="lineno">  832</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00833" name="l00833"></a><span class="lineno">  833</span> </div>
 <div class="line"><a id="l00834" name="l00834"></a><span class="lineno">  834</span>    <span class="keywordflow">case</span> A2DP_SUBEVENT_STREAM_RELEASED:</div>
@@ -925,7 +925,7 @@ $(function() {
 <div class="line"><a id="l00851" name="l00851"></a><span class="lineno">  851</span>        avrcp_target_set_playback_status(media_tracker.avrcp_cid,</div>
 <div class="line"><a id="l00852" name="l00852"></a><span class="lineno">  852</span>                                         AVRCP_PLAYBACK_STATUS_STOPPED);</div>
 <div class="line"><a id="l00853" name="l00853"></a><span class="lineno">  853</span>      }</div>
-<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>      a2dp_demo_timer_stop(&amp;media_tracker);</div>
+<div class="line"><a id="l00854" name="l00854"></a><span class="lineno">  854</span>      a2dp_arduino_timer_stop(&amp;media_tracker);</div>
 <div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>    <span class="keywordflow">case</span> A2DP_SUBEVENT_SIGNALING_CONNECTION_RELEASED:</div>
 <div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>      cid = a2dp_subevent_signaling_connection_released_get_a2dp_cid(packet);</div>
@@ -1114,7 +1114,7 @@ $(function() {
 <div class="line"><a id="l01040" name="l01040"></a><span class="lineno"> 1040</span>    TRACED();</div>
 <div class="line"><a id="l01041" name="l01041"></a><span class="lineno"> 1041</span>    bd_addr_t iut_address;</div>
 <div class="line"><a id="l01042" name="l01042"></a><span class="lineno"> 1042</span>    gap_local_bd_addr(iut_address);</div>
-<div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span>    printf(<span class="stringliteral">&quot;\n--- Bluetooth  A2DP Source/AVRCP Demo %s ---\n&quot;</span>,</div>
+<div class="line"><a id="l01043" name="l01043"></a><span class="lineno"> 1043</span>    printf(<span class="stringliteral">&quot;\n--- Bluetooth  A2DP Source/AVRCP arduino %s ---\n&quot;</span>,</div>
 <div class="line"><a id="l01044" name="l01044"></a><span class="lineno"> 1044</span>           bd_addr_to_str(iut_address));</div>
 <div class="line"><a id="l01045" name="l01045"></a><span class="lineno"> 1045</span>    printf(<span class="stringliteral">&quot;a      - Scan for Bluetooth speaker and connect\n&quot;</span>);</div>
 <div class="line"><a id="l01046" name="l01046"></a><span class="lineno"> 1046</span>    printf(<span class="stringliteral">&quot;b      - A2DP Source create connection to addr %s\n&quot;</span>,</div>
@@ -1144,7 +1144,7 @@ $(function() {
 <div class="line"><a id="l01070" name="l01070"></a><span class="lineno"> 1070</span>    uint8_t status = ERROR_CODE_SUCCESS;</div>
 <div class="line"><a id="l01071" name="l01071"></a><span class="lineno"> 1071</span>    <span class="keywordflow">switch</span> (cmd) {</div>
 <div class="line"><a id="l01072" name="l01072"></a><span class="lineno"> 1072</span>    <span class="keywordflow">case</span> <span class="charliteral">&#39;a&#39;</span>:</div>
-<div class="line"><a id="l01073" name="l01073"></a><span class="lineno"> 1073</span>      a2dp_source_demo_start_scanning();</div>
+<div class="line"><a id="l01073" name="l01073"></a><span class="lineno"> 1073</span>      a2dp_source_arduino_start_scanning();</div>
 <div class="line"><a id="l01074" name="l01074"></a><span class="lineno"> 1074</span>      <span class="keywordflow">break</span>;</div>
 <div class="line"><a id="l01075" name="l01075"></a><span class="lineno"> 1075</span>    <span class="keywordflow">case</span> <span class="charliteral">&#39;b&#39;</span>:</div>
 <div class="line"><a id="l01076" name="l01076"></a><span class="lineno"> 1076</span>      status =</div>
