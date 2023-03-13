@@ -23,7 +23,7 @@ Currently I am supporting only SBC, but it should be quite easy to extend the fu
 ## Documentation
 
 - [Classes](https://pschatzmann.github.io/RP2040-A2DP/docs/html/annotated.html)
-- Further information about the RP2040 Bluetooth integration can be found in [the documentation](https://arduino-pico.readthedocs.io/en/latest/bluetooth.html).
+- Further information about the RP2040 Bluetooth integration can be found in [the pico documentation](https://arduino-pico.readthedocs.io/en/latest/bluetooth.html).
 
 
 ## Dependencies

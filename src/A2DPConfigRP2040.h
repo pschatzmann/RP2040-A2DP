@@ -10,8 +10,8 @@
  */
 #pragma once
 
-#ifndef ENABLE_BLE
-#error Enable Bluetooth
+#ifdef ENABLE_BLE
+#undef ENABLE_BLE
 #endif
 
 // Common
@@ -21,6 +21,7 @@
 //#define HAVE_BTSTACK_STDIN
 
 // Sink
+#define MAX_VOLUME_RECEIVED 2500
 #define OPTIMAL_FRAMES_MIN 30
 #define OPTIMAL_FRAMES_MAX 40
 #define ADDITIONAL_FRAMES 20

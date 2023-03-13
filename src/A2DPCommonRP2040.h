@@ -1,6 +1,7 @@
 #pragma once
 #include "A2DPConfigRP2040.h"
 #include "btstack.h"
+#include <pico/cyw43_arch.h>
 
 namespace a2dp_rp2040 {
 
@@ -27,7 +28,8 @@ void sink_avrcp_controller_packet_handler(uint8_t packet_type, uint16_t channel,
 
 void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
                                       uint8_t *packet, uint16_t size);
-void sink_playback_handler(int16_t *buffer, uint16_t num_audio_frames);
+
+// void sink_playback_handler(int16_t *buffer, uint16_t num_audio_frames);
 
 // -- Declare Source Callback functions
 
@@ -49,7 +51,6 @@ void source_hci_packet_handler(uint8_t packet_type, uint16_t channel,
 void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
                                  uint8_t *packet, uint16_t size);
 
-
 /**
  * @brief Common A2DP functionality
  * @author Phil Schatzmann
@@ -59,6 +60,14 @@ public:
   //   bool setPower(bool on) {
   //     return hci_power_control(on ? HCI_POWER_ON : HCI_POWER_OFF) == 0;
   //   }
+
+  void lockBluetooth() {
+    async_context_acquire_lock_blocking(cyw43_arch_async_context());
+  }
+
+  void unlockBluetooth() {
+    async_context_release_lock(cyw43_arch_async_context());
+  }
 };
 
-}
+} // namespace a2dp_rp2040

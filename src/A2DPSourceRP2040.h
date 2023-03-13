@@ -59,8 +59,8 @@
  */
 // *****************************************************************************
 #include "A2DPCommonRP2040.h"
-#include "AudioCodecs/CodecSBC.h"
 #include "AudioTools.h"
+#include "AudioCodecs/CodecSBC.h"
 
 #include <inttypes.h>
 #include <stdint.h>
@@ -178,10 +178,6 @@ protected:
   int current_sample_rate = 44100;
   int new_sample_rate = 44100;
 
-  // int hxcmod_initialized;
-  //  modcontext mod_context;
-  //  tracker_buffer_state trkbuf;
-
   /* AVRCP Target context START */
 
   struct avrcp_play_status_info_t {
@@ -190,16 +186,6 @@ protected:
     avrcp_playback_status_t status;
     uint32_t song_position_ms; // 0xFFFFFFFF if not supported
   };
-
-  // avrcp_track_t tracks[1] = {
-  //     {{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01},
-  //      1,
-  //      "A2DPSource",
-  //      "Generated",
-  //      "A2DP Source",
-  //      "vivid",
-  //      12345},
-  // };
 
   Vector<avrcp_track_t> tracks;
   int current_track_index;

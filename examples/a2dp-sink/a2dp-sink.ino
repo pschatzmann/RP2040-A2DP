@@ -2,6 +2,11 @@
 
 I2SStream out;
 
-void setup() { A2DPSink.begin(out, "rp2040"); }
+void setup() {
+  Serial.begin(115200);
+  AudioLogger::instance().begin(Serial, AudioLogger::Info);
+
+  A2DPSink.begin(out, "rp2040");
+}
 
 void loop() {}
