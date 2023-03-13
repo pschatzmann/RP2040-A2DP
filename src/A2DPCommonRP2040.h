@@ -54,7 +54,7 @@ void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
  * @brief Common A2DP functionality
  * @author Phil Schatzmann
  */
-class A2DPCommonRP2040 {
+class A2DPCommon {
 public:
   //   bool setPower(bool on) {
   //     return hci_power_control(on ? HCI_POWER_ON : HCI_POWER_OFF) == 0;

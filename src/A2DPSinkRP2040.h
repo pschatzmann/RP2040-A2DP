@@ -58,7 +58,7 @@
  *
  */
 // *****************************************************************************
-#include "A2DPCommonRP2040.h"
+#include "A2DPCommon.h"
 #include "AudioTools.h"
 #include "AudioCodecs/CodecSBC.h"
 #include <stdint.h>
@@ -85,7 +85,7 @@ namespace a2dp_rp2040 {
  * @author Phil Schatzmann
  */
 
-class A2DPSinkClass : public A2DPCommonRP2040 {
+class A2DPSinkClass : public A2DPCommon {
 
 public:
   /// Starts A2DP Sink with the output to I2S

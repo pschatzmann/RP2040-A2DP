@@ -58,7 +58,7 @@
  *
  */
 // *****************************************************************************
-#include "A2DPCommonRP2040.h"
+#include "A2DPCommon.h"
 #include "AudioCodecs/CodecSBC.h"
 #include "AudioTools.h"
 
@@ -73,7 +73,7 @@ namespace a2dp_rp2040 {
  * @brief A2DPSource for the RP2040 
  * @author Phil Schatzmann
  */
-class A2DPSourceClass : public A2DPCommonRP2040 {
+class A2DPSourceClass : public A2DPCommon {
 public:
   bool begin(Stream &in) {
     TRACEI();

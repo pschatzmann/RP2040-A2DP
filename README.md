@@ -19,7 +19,11 @@ Currently I am supporting only SBC, but it should be quite easy to extend the fu
 
 The goal of this project is to make the __full A2DP functionality available for the RP2040__. 
 
-# Dependencies
+## Documentation
+
+- [Classes](https://pschatzmann.github.io/RP2040-A2DP/docs/html/annotated.html)
+
+## Dependencies
 
 You need to install the following projects:
 
