@@ -3,7 +3,7 @@ The RP2040 W is a microcontroller that provides a Bluetooth A2DP API which can b
 
 The goal of this project is to make the __full A2DP functionality available for the RP2040__. 
 
-![RP2040W](https://www.pschatzmann.ch/wp-content/uploads/2023/03/raspberry-pi-pico-w-1.jpg)
+<img src="https://pschatzmann.github.io/RP2040-A2DP/docs/img/RASP_PI_PICO_W_01.jpeg" width="20%" />
 
 I am currently already providing an [A2DP library for the ESP32](https://github.com/pschatzmann/ESP32-A2DP). 
 
