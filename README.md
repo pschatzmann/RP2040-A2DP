@@ -30,7 +30,7 @@ Currently I am supporting only SBC, but it should be quite easy to extend the fu
 
 You need to install the following projects:
 
-- https://github.com/pschatzmann/ESP32-A2DP
+- https://github.com/pschatzmann/RP2040-A2DP
 - https://github.com/pschatzmann/arduino-audio-tools 
 - https://github.com/pschatzmann/arduino-libsbc
 
