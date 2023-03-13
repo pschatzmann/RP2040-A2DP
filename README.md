@@ -1,5 +1,5 @@
 # RP2040 A2DP
-The RP2040 W is a microcontroller that provides a Bluetooth A2DP API which can be used to receive and process audio data e.g. from your Mobile Phone. The output is a PCM data stream decoded from SBC format. 
+The RP2040 W is a microcontroller that provides a Bluetooth A2DP API which can be used to receive and process __audio data__ e.g. from your Mobile Phone. The output is a PCM data stream decoded from SBC format. 
 
 The goal of this project is to make the __full A2DP functionality available for the RP2040__. 
 
@@ -23,13 +23,14 @@ Currently I am supporting only SBC, but it should be quite easy to extend the fu
 ## Documentation
 
 - [Classes](https://pschatzmann.github.io/RP2040-A2DP/docs/html/annotated.html)
+- Further information about the RP2040 Bluetooth integration can be found in [the documentation](https://arduino-pico.readthedocs.io/en/latest/bluetooth.html).
+
 
 ## Dependencies
 
 You need to install the following projects:
 
-- https://github.com/pschatzmann/arduino-audio-tools
-- https://github.com/pschatzmann/arduino-libsbc
 - https://github.com/pschatzmann/ESP32-A2DP
+- https://github.com/pschatzmann/arduino-audio-tools 
+- https://github.com/pschatzmann/arduino-libsbc
 
-Further information about the RP2040 Bluetooth integration can be found in [the documentation](https://arduino-pico.readthedocs.io/en/latest/bluetooth.html).
