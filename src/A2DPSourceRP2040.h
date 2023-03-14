@@ -194,7 +194,7 @@ protected:
   int data_source = 0;
   avrcp_play_status_info_t play_info;
 
-  int16_t get_max_input_amplitude() override { return MAX_VOLUME_INPUT;}
+  int16_t get_max_input_amplitude() override { return MAX_AMPLITUDE_INPUT;}
 
   virtual int get_avrcp_cid() { return media_tracker.a2dp_cid;}
 

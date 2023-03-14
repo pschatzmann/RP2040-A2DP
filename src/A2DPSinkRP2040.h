@@ -212,7 +212,7 @@ protected:
     bool playing;
   } a2dp_sink_arduino_avrcp_connection;
 
-  int16_t get_max_input_amplitude() override { return MAX_VOLUME_RECEIVED;}
+  int16_t get_max_input_amplitude() override { return MAX_AMPLITUDE_RECEIVED;}
 
   int get_avrcp_cid() { return a2dp_sink_arduino_avrcp_connection.avrcp_cid; }
   
