@@ -253,7 +253,7 @@ protected:
 
     l2cap_init();
 
-    if isBLEEnabled()   {
+    if (isBLEEnabled()) {
       // Initialize LE Security Manager. Needed for cross-transport key
       // derivation
       sm_init();
