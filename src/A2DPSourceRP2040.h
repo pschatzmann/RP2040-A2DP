@@ -82,7 +82,7 @@ public:
     TRACEI();
     p_in = &in;
     remote_name = name;
-    // setup output chain: encoder_stream -> volume_stream -> queue
+    // setup output chain: encoder_stream -> source_ -> queue
     volume_stream.setTarget(queue);
     encoder_stream.setOutput(&volume_stream);
     encoder_stream.setEncoder(&sbc_encoder);
@@ -331,7 +331,7 @@ protected:
     hci_event_callback_registration.callback = &source_hci_packet_handler;
     hci_add_event_handler(&hci_event_callback_registration);
 
-    sourc_a2dp_configure_sample_rate(current_sample_rate);
+    source_a2dp_configure_sample_rate(current_sample_rate);
     data_source = 0;
 
     // Parse human readable Bluetooth address.
@@ -344,7 +344,7 @@ protected:
   }
   /* LISTING_END */
 
-  void sourc_a2dp_configure_sample_rate(int sample_rate) {
+  void source_a2dp_configure_sample_rate(int sample_rate) {
     TRACED();
     current_sample_rate = sample_rate;
     media_tracker.sbc_storage_count = 0;
@@ -354,6 +354,14 @@ protected:
     cfg.sample_rate = sbc_configuration.sampling_frequency;
     cfg.channels = NUM_CHANNELS;
     encoder_stream.begin(cfg);
+
+    // setup volume output
+    auto vcfg = volume_stream.defaultConfig();
+    vcfg.copyFrom(cfg);
+    vcfg.volume = 0.01f * volume_percentage;
+    volume_stream.begin(vcfg);
+    avrcp_volume_changed(volume_percentage);    
+
   }
 
   int sbc_buffer_length() {
@@ -681,7 +689,7 @@ protected:
       dump_sbc_configuration(&sbc_configuration);
 
       // TODO SBC encoder Init
-      sourc_a2dp_configure_sample_rate(sbc_configuration.sampling_frequency);
+      source_a2dp_configure_sample_rate(sbc_configuration.sampling_frequency);
       // auto cfg = encoder_stream.defaultConfig();
       // cfg.sample_rate = sbc_configuration.sampling_frequency;
       // cfg.channels = NUM_CHANNELS;
@@ -733,7 +741,7 @@ protected:
              cid, local_seid,
              a2dp_subevent_stream_established_get_remote_seid(packet));
 
-      sourc_a2dp_configure_sample_rate(current_sample_rate);
+      source_a2dp_configure_sample_rate(current_sample_rate);
       media_tracker.stream_opened = 1;
       status = a2dp_source_start_stream(media_tracker.a2dp_cid,
                                         media_tracker.local_seid);
@@ -754,7 +762,7 @@ protected:
       LOGI("A2DP Source: Stream reconfigured a2dp_cid 0x%02x, local_seid "
              "0x%02x",
              cid, local_seid);
-      sourc_a2dp_configure_sample_rate(new_sample_rate);
+      source_a2dp_configure_sample_rate(new_sample_rate);
       status = a2dp_source_start_stream(media_tracker.a2dp_cid,
                                         media_tracker.local_seid);
       break;

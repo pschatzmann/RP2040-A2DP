@@ -379,6 +379,7 @@ protected:
     auto vcfg = volume_stream.defaultConfig();
     vcfg.copyFrom(cfg);
     vcfg.allow_boost = true;
+    vcfg.volume = 0.01f * volume_percentage;
     volume_stream.begin(vcfg);
     avrcp_volume_changed(volume_percentage);
 
