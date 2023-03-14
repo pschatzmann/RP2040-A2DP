@@ -10,6 +10,10 @@
  */
 #pragma once
 
+#if !ENABLE_CLASSIC
+#error Bluetooth was not enabled!
+#endif
+
 #ifdef ENABLE_BLE
 #undef ENABLE_BLE
 #endif

@@ -59,14 +59,9 @@
  */
 // *****************************************************************************
 #include "A2DPCommonRP2040.h"
-#include "AudioCodecs/CodecSBC.h"
-#include "AudioTools.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "bluetooth.h"
-#include "btstack_defines.h"
 
 #ifdef HAVE_BTSTACK_STDIN
 #include "btstack_stdin.h"
@@ -124,68 +119,8 @@ public:
   void end() {
     TRACEI();
     stop();
-    a2dp_sink_disconnect(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
+    a2dp_sink_disconnect(get_avrcp_cid());
     dec_stream.end();
-  }
-
-  /// avrcp play
-  bool play() {
-    TRACEI();
-    return 0 ==
-           avrcp_controller_play(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-  }
-
-  /// avrcp stop
-  bool stop() {
-    TRACEI();
-    return 0 ==
-           avrcp_controller_stop(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-  }
-
-  /// avrcp pause
-  bool pause() {
-    TRACEI();
-    return 0 ==
-           avrcp_controller_pause(a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-  }
-
-  /// avrcp forward
-  bool next() {
-    TRACEI();
-    return 0 == avrcp_controller_forward(
-                    a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-  }
-
-  /// avrcp backward
-  bool previous() {
-    TRACEI();
-    return 0 == avrcp_controller_backward(
-                    a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-  }
-
-  /// avrcp fast_forwar
-  bool fastForward(bool start) {
-    TRACEI();
-    if (start) {
-      return 0 == avrcp_controller_press_and_hold_fast_forward(
-                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-    } else {
-      return 0 == avrcp_controller_release_press_and_hold_cmd(
-                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-    }
-  }
-
-  /// avrcp rewind
-  bool rewind(bool start) {
-    TRACEI();
-    if (start) {
-      return 0 == avrcp_controller_press_and_hold_rewind(
-                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-
-    } else {
-      return 0 == avrcp_controller_release_press_and_hold_cmd(
-                      a2dp_sink_arduino_avrcp_connection.avrcp_cid);
-    }
   }
 
   /// Sets the volume
@@ -308,6 +243,9 @@ protected:
     uint16_t avrcp_cid;
     bool playing;
   } a2dp_sink_arduino_avrcp_connection;
+
+  int get_avrcp_cid(){ return a2dp_sink_arduino_avrcp_connection.avrcp_cid; }
+
 
   /* @section Main Application Setup
    *

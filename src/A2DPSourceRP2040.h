@@ -59,8 +59,6 @@
  */
 // *****************************************************************************
 #include "A2DPCommonRP2040.h"
-#include "AudioTools.h"
-#include "AudioCodecs/CodecSBC.h"
 
 #include <inttypes.h>
 #include <stdint.h>
@@ -196,6 +194,9 @@ protected:
   int current_track_index;
   int data_source = 0;
   avrcp_play_status_info_t play_info;
+
+
+  virtual int get_avrcp_cid() { return media_tracker.a2dp_cid;}
 
   /* AVRCP Target context END */
 

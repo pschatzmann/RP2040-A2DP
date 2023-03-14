@@ -1,7 +1,12 @@
 #pragma once
 #include "A2DPConfigRP2040.h"
 #include "btstack.h"
+#include "bluetooth.h"
+#include "btstack_defines.h"
 #include <pico/cyw43_arch.h>
+
+#include "AudioTools.h"
+#include "AudioCodecs/CodecSBC.h"
 
 namespace a2dp_rp2040 {
 
@@ -57,9 +62,6 @@ void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
  */
 class A2DPCommon {
 public:
-  //   bool setPower(bool on) {
-  //     return hci_power_control(on ? HCI_POWER_ON : HCI_POWER_OFF) == 0;
-  //   }
 
   void lockBluetooth() {
     async_context_acquire_lock_blocking(cyw43_arch_async_context());
@@ -68,6 +70,70 @@ public:
   void unlockBluetooth() {
     async_context_release_lock(cyw43_arch_async_context());
   }
+
+  /// avrcp play
+  bool play() {
+    TRACEI();
+    return 0 ==
+           avrcp_controller_play(get_avrcp_cid());
+  }
+
+  /// avrcp stop
+  bool stop() {
+    TRACEI();
+    return 0 ==
+           avrcp_controller_stop(get_avrcp_cid());
+  }
+
+  /// avrcp pause
+  bool pause() {
+    TRACEI();
+    return 0 ==
+           avrcp_controller_pause(get_avrcp_cid());
+  }
+
+  /// avrcp forward
+  bool next() {
+    TRACEI();
+    return 0 == avrcp_controller_forward(
+                    get_avrcp_cid());
+  }
+
+  /// avrcp backward
+  bool previous() {
+    TRACEI();
+    return 0 == avrcp_controller_backward(
+                    get_avrcp_cid());
+  }
+
+  /// avrcp fast_forwar
+  bool fastForward(bool start) {
+    TRACEI();
+    if (start) {
+      return 0 == avrcp_controller_press_and_hold_fast_forward(
+                      get_avrcp_cid());
+    } else {
+      return 0 == avrcp_controller_release_press_and_hold_cmd(
+                      get_avrcp_cid());
+    }
+  }
+
+  /// avrcp rewind
+  bool rewind(bool start) {
+    TRACEI();
+    if (start) {
+      return 0 == avrcp_controller_press_and_hold_rewind(
+                      get_avrcp_cid());
+
+    } else {
+      return 0 == avrcp_controller_release_press_and_hold_cmd(
+                      get_avrcp_cid());
+    }
+  }
+
+
+protected:
+  virtual int get_avrcp_cid() = 0;
 };
 
 } // namespace a2dp_rp2040
