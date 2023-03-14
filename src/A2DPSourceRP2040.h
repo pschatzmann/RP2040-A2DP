@@ -80,11 +80,10 @@ public:
 
   bool begin(Stream &in, const char* name) {
     TRACEI();
-    p_in = &in;
+    volume_stream.setStream(in);
     remote_name = name;
-    // setup output chain: encoder_stream -> source_ -> queue
-    volume_stream.setTarget(media_tracker.queue);
-    encoder_stream.setOutput(&volume_stream);
+    // setup output chain: in -> volume_stream -> encoder_stream -> queue
+    encoder_stream.setOutput(&media_tracker.queue);
     encoder_stream.setEncoder(&sbc_encoder);
     setupTrack();
     int err = a2dp_source_and_avrcp_services_init();
@@ -129,7 +128,7 @@ protected:
     uint8_t streaming;
     int max_media_payload_size;
 
-    RingBuffer<uint8_t> rb{1024};
+    RingBuffer<uint8_t> rb{SBC_STORAGE_SIZE};
     QueueStream<uint8_t> queue{rb};
     volatile bool sbc_is_busy = false;
 
@@ -348,8 +347,15 @@ protected:
     current_sample_rate = sample_rate;
     media_tracker.samples_ready = 0;
 
+    // set encoder parameters
+    sbc_encoder.setSubbands(sbc_configuration.subbands);
+    sbc_encoder.setBitpool(sbc_configuration.max_bitpool_value);
+    sbc_encoder.setBlocks(sbc_configuration.block_length);
+    sbc_encoder.setAllocationMethod(sbc_configuration.allocation_method);
+
+
     auto cfg = encoder_stream.defaultConfig();
-    cfg.sample_rate = sbc_configuration.sampling_frequency;
+    cfg.sample_rate = sample_rate;
     cfg.channels = NUM_CHANNELS;
     encoder_stream.begin(cfg);
 
@@ -384,7 +390,7 @@ protected:
     // log output
     LOGI("a2dp_arduino_send_media_packet: %d packets (%d bytes)", num_frames, available);
     if (available % num_bytes_in_frame){
-      LOGW("Invalid number of available bytes");
+      LOGW("Invalid number of available bytes: available: %d, frame_size: %d", available, num_bytes_in_frame);
     }
 
     // send out data
@@ -410,7 +416,7 @@ protected:
     int len = sbc_buffer_length_pcm()*SBC_PACKET_COUNT;
     uint8_t pcm_buffer[len];
     while (media_tracker.queue.available() == 0) {
-      size_t bytes = p_in->readBytes(pcm_buffer, len);
+      size_t bytes = volume_stream.readBytes(pcm_buffer, len);
       LOGD("readBytes: %d -> %d", len, bytes);
 
       size_t bytes_written = encoder_stream.write(pcm_buffer, bytes);
