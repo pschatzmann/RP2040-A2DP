@@ -8,9 +8,8 @@
 #include "AudioTools.h"
 #include "AudioCodecs/CodecSBC.h"
 
-//#define BYTES_PER_FRAME     (2*NUM_CHANNELS)
-//#define BYTES_PER_AUDIO_SAMPLE (2 * NUM_CHANNELS)
-
+// #define BYTES_PER_FRAME     (2*NUM_CHANNELS)
+// #define BYTES_PER_AUDIO_SAMPLE (2 * NUM_CHANNELS)
 
 namespace a2dp_rp2040 {
 
@@ -163,8 +162,8 @@ public:
   }
 
   bool isPlaying() { return is_playing; }
-  bool isBLEEnabled() {return is_ble_enabled;}
-  void setBLEEnabled(bool active){is_ble_enabled = active;}
+  bool isBLEEnabled() { return is_ble_enabled; }
+  void setBLEEnabled(bool active) { is_ble_enabled = active; }
 
 protected:
   VolumeStream volume_stream;
@@ -177,6 +176,8 @@ protected:
   virtual int get_avrcp_cid() = 0;
 
   virtual void set_playing(bool playing) { is_playing = playing; }
+
+  bool is_valid_playstatus(int status) { return (status >= 1) && (status <= 4); }
 
   virtual void local_avrcp_controller_packet_handler(uint8_t packet_type,
                                                      uint16_t channel,
@@ -205,7 +206,8 @@ protected:
 
     case AVRCP_SUBEVENT_NOTIFICATION_VOLUME_CHANGED: {
       int vol = avrcp_subevent_notification_volume_changed_get_absolute_volume(
-                    packet) * 100 / 127;
+                    packet) *
+                100 / 127;
       LOGI("AVRCP Controller: Notification Absolute Volume %d %%", vol);
       avrcp_volume_changed(vol);
     } break;
@@ -234,15 +236,14 @@ protected:
       if (metadata_callback)
         metadata_callback(MDPlaybackPosMs, nullptr, pos_ms);
     } break;
-    case AVRCP_SUBEVENT_NOTIFICATION_PLAYBACK_STATUS_CHANGED:
-      LOGI(
-          "AVRCP Controller: Playback status changed %s\n",
-          avrcp_play_status2str(
-              avrcp_subevent_notification_playback_status_changed_get_play_status(
-                  packet)));
+    case AVRCP_SUBEVENT_NOTIFICATION_PLAYBACK_STATUS_CHANGED: {
       play_status =
           avrcp_subevent_notification_playback_status_changed_get_play_status(
               packet);
+      if (is_valid_playstatus(play_status)) {
+        LOGI("AVRCP Controller: Playback status changed %s",
+             avrcp_play_status2str(play_status));
+      }
       switch (play_status) {
       case AVRCP_PLAYBACK_STATUS_PLAYING:
         // avrcp_connection->playing = true;
@@ -253,8 +254,12 @@ protected:
         set_playing(false);
         break;
       }
-      LOGI("AVRCP Controller: Playback status changed %s",
-           avrcp_play_status2str(play_status));
+
+      if (is_valid_playstatus(play_status)) {
+        LOGI("AVRCP Controller: Playback status changed %s",
+             avrcp_play_status2str(play_status));
+      }
+    }
       return;
     case AVRCP_SUBEVENT_NOTIFICATION_NOW_PLAYING_CONTENT_CHANGED:
       LOGI("AVRCP Controller: Playing content changed");

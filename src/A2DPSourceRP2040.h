@@ -83,7 +83,7 @@ public:
     p_in = &in;
     remote_name = name;
     // setup output chain: encoder_stream -> source_ -> queue
-    volume_stream.setTarget(queue);
+    volume_stream.setTarget(media_tracker.queue);
     encoder_stream.setOutput(&volume_stream);
     encoder_stream.setEncoder(&sbc_encoder);
     setupTrack();
@@ -114,11 +114,6 @@ protected:
   friend void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
                                           uint8_t *packet, uint16_t size);
 
-  Stream *p_in = nullptr;
-  SBCEncoder sbc_encoder;
-  EncodedAudioStream encoder_stream;
-  RingBuffer<uint8_t> rb{1024};
-  QueueStream<uint8_t> queue{rb};
 
   struct a2dp_media_sending_context_t {
     uint16_t a2dp_cid;
@@ -134,20 +129,13 @@ protected:
     uint8_t streaming;
     int max_media_payload_size;
 
-    uint8_t sbc_storage[SBC_STORAGE_SIZE];
-    uint16_t sbc_storage_count;
-    uint8_t sbc_ready_to_send;
+    RingBuffer<uint8_t> rb{1024};
+    QueueStream<uint8_t> queue{rb};
+    volatile bool sbc_is_busy = false;
 
     uint8_t volume;
-  };
+  } media_tracker;
 
-  uint8_t media_sbc_codec_capabilities[4] = {
-      (AVDTP_SBC_44100 << 4) | AVDTP_SBC_STEREO,
-      0xFF, //(AVDTP_SBC_BLOCK_LENGTH_16 << 4) | (AVDTP_SBC_SUBBANDS_8 << 2) |
-            // AVDTP_SBC_ALLOCATION_METHOD_LOUDNESS,
-      2, 53};
-
-  const int A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS = 12;
 
   struct media_codec_configuration_sbc_t {
     int reconfigure;
@@ -159,26 +147,36 @@ protected:
     int max_bitpool_value;
     btstack_sbc_channel_mode_t channel_mode;
     btstack_sbc_allocation_method_t allocation_method;
-  };
+  } sbc_configuration;
+
+  Stream *p_in = nullptr;
+  SBCEncoder sbc_encoder;
+  EncodedAudioStream encoder_stream;
 
   btstack_packet_callback_registration_t hci_event_callback_registration;
 
+  const int A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS = 12;
   const char *device_addr_string = "00:21:3C:AC:F7:38";
   const char *remote_name=nullptr;
 
   bd_addr_t device_addr;
   bool scan_active;
 
+  uint8_t media_sbc_codec_capabilities[4] = {
+      (AVDTP_SBC_44100 << 4) | AVDTP_SBC_STEREO,
+      0xFF, //(AVDTP_SBC_BLOCK_LENGTH_16 << 4) | (AVDTP_SBC_SUBBANDS_8 << 2) |
+            // AVDTP_SBC_ALLOCATION_METHOD_LOUDNESS,
+      2, 53};
+
+
   uint8_t sdp_a2dp_source_service_buffer[150];
   uint8_t sdp_avrcp_target_service_buffer[200];
   uint8_t sdp_avrcp_controller_service_buffer[200];
   uint8_t device_id_sdp_service_buffer[100];
 
-  media_codec_configuration_sbc_t sbc_configuration;
-  btstack_sbc_encoder_state_t sbc_encoder_state;
+  //btstack_sbc_encoder_state_t sbc_encoder_state;
 
   uint8_t media_sbc_codec_configuration[4];
-  a2dp_media_sending_context_t media_tracker;
 
   int current_sample_rate = 44100;
   int new_sample_rate = 44100;
@@ -348,7 +346,6 @@ protected:
   void source_a2dp_configure_sample_rate(int sample_rate) {
     TRACED();
     current_sample_rate = sample_rate;
-    media_tracker.sbc_storage_count = 0;
     media_tracker.samples_ready = 0;
 
     auto cfg = encoder_stream.defaultConfig();
@@ -361,7 +358,10 @@ protected:
     vcfg.copyFrom(cfg);
     vcfg.volume = 0.01f * volume_percentage;
     volume_stream.begin(vcfg);
-    avrcp_volume_changed(volume_percentage);    
+    avrcp_volume_changed(volume_percentage);   
+
+    // start queue stream
+    media_tracker.queue.begin();
 
   }
 
@@ -371,50 +371,50 @@ protected:
 
   void a2dp_arduino_send_media_packet(void) {
     TRACED();
+
+    // determine data
     int num_bytes_in_frame = sbc_buffer_length();
-    int bytes_in_storage = media_tracker.sbc_storage_count;
-    uint8_t num_frames = bytes_in_storage / num_bytes_in_frame;
-    // Prepend SBC Header
-    media_tracker.sbc_storage[0] =
-        num_frames; // (fragmentation << 7) | (starting_packet << 6) |
-                    // (last_packet << 5) | num_frames;
-    avdtp_source_stream_send_media_payload_rtp(
+    int available = media_tracker.queue.available();
+    int num_frames = available / num_bytes_in_frame;
+
+    // log output
+    LOGI("a2dp_arduino_send_media_packet: %d packets (%d bytes)", num_frames, available);
+    if (available % num_bytes_in_frame){
+      LOGW("Invalid number of available bytes");
+    }
+
+    // send out data
+    uint8_t buffer[available+1];
+    // Prepend SBC Header // (fragmentation << 7) | (starting_packet << 6) | (last_packet << 5) | num_frames;
+    media_tracker.queue.readBytes(buffer+1, available);
+    buffer[0] = num_frames; 
+    int rc = avdtp_source_stream_send_media_payload_rtp(
         media_tracker.a2dp_cid, media_tracker.local_seid, 0,
-        media_tracker.sbc_storage, bytes_in_storage + 1);
+        buffer, available + 1);
 
-    media_tracker.sbc_storage_count = 0;
-    media_tracker.sbc_ready_to_send = 0;
+    if (rc!=ERROR_CODE_SUCCESS){
+      LOGE("avdtp_source_stream_send_media_payload_rtp: %d", rc);
+    }
+
+    // allow to process the next packets
+    media_tracker.sbc_is_busy = false;
   }
 
-
-  void produce_audio(int16_t *pcm_buffer, int num_samples) {
-    TRACED();
-    p_in->readBytes((uint8_t *)pcm_buffer, num_samples * 2);
-  }
 
   int a2dp_arduino_fill_sbc_audio_buffer(a2dp_media_sending_context_t *context) {
     TRACED();
-    int total_num_bytes_read = 0;
-    unsigned int num_audio_samples_per_sbc_buffer = sbc_buffer_length();
-    while (context->samples_ready >= num_audio_samples_per_sbc_buffer &&
-           (context->max_media_payload_size - context->sbc_storage_count) >=
-               sbc_buffer_length()) {
+    int len = sbc_buffer_length()*5;
+    uint8_t pcm_buffer[len];
+    while (media_tracker.queue.available() == 0) {
+      size_t bytes = p_in->readBytes(pcm_buffer, len);
+      LOGD("readBytes: %d -> %d", len, bytes);
 
-      int16_t pcm_frame[num_audio_samples_per_sbc_buffer / 2 * NUM_CHANNELS];
-      while (queue.available() == 0) {
-        produce_audio(pcm_frame, num_audio_samples_per_sbc_buffer * 2);
-        encoder_stream.write((uint8_t *)pcm_frame, sizeof(pcm_frame));
-      }
-      uint16_t sbc_frame_size = queue.available();
-
-      total_num_bytes_read += num_audio_samples_per_sbc_buffer;
-      // first byte in sbc storage contains sbc media header
-      queue.readBytes(&context->sbc_storage[1 + context->sbc_storage_count],
-                      sbc_frame_size);
-      context->sbc_storage_count += sbc_frame_size;
-      context->samples_ready -= num_audio_samples_per_sbc_buffer;
+      size_t bytes_written = encoder_stream.write(pcm_buffer, bytes);
+      LOGD("write: %d -> %d", bytes_written, media_tracker.queue.available());
     }
-    return total_num_bytes_read;
+    int available = media_tracker.queue.available();
+    LOGD("sbc bytes: %d", available);
+    return available;
   }
 
   void local_a2dp_audio_timeout_handler(btstack_timer_source_t *timer) {
@@ -442,27 +442,23 @@ protected:
     context->time_audio_data_sent = now;
     context->samples_ready += num_samples;
 
-    if (context->sbc_ready_to_send)
+    if (context->sbc_is_busy)
       return;
 
     a2dp_arduino_fill_sbc_audio_buffer(context);
 
-    if ((context->sbc_storage_count + sbc_buffer_length()) >
-        context->max_media_payload_size) {
-      // schedule sending
-      context->sbc_ready_to_send = 1;
-      a2dp_source_stream_endpoint_request_can_send_now(context->a2dp_cid,
+    // schedule sending
+    context->sbc_is_busy = true;
+    a2dp_source_stream_endpoint_request_can_send_now(context->a2dp_cid,
                                                        context->local_seid);
-    }
-  }
+   }
 
   void a2dp_arduino_timer_start(a2dp_media_sending_context_t *context) {
     TRACED();
     context->max_media_payload_size = btstack_min(
         a2dp_max_media_payload_size(context->a2dp_cid, context->local_seid),
         SBC_STORAGE_SIZE);
-    context->sbc_storage_count = 0;
-    context->sbc_ready_to_send = 0;
+    context->sbc_is_busy = false;
     context->streaming = 1;
     btstack_run_loop_remove_timer(&context->audio_timer);
     btstack_run_loop_set_timer_handler(&context->audio_timer,
@@ -478,8 +474,7 @@ protected:
     context->acc_num_missed_samples = 0;
     context->samples_ready = 0;
     context->streaming = 1;
-    context->sbc_storage_count = 0;
-    context->sbc_ready_to_send = 0;
+    context->sbc_is_busy = false;
     btstack_run_loop_remove_timer(&context->audio_timer);
   }
 
