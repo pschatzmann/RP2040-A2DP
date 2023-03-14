@@ -365,15 +365,19 @@ protected:
 
   }
 
-  int sbc_buffer_length() {
+  int sbc_buffer_length_sbc() {
     return sbc_encoder.frameLength();
+  }
+
+  int sbc_buffer_length_pcm() {
+    return sbc_encoder.codeSize();
   }
 
   void a2dp_arduino_send_media_packet(void) {
     TRACED();
 
     // determine data
-    int num_bytes_in_frame = sbc_buffer_length();
+    int num_bytes_in_frame = sbc_buffer_length_sbc();
     int available = media_tracker.queue.available();
     int num_frames = available / num_bytes_in_frame;
 
@@ -403,7 +407,7 @@ protected:
 
   int a2dp_arduino_fill_sbc_audio_buffer(a2dp_media_sending_context_t *context) {
     TRACED();
-    int len = sbc_buffer_length()*5;
+    int len = sbc_buffer_length_pcm()*SBC_PACKET_COUNT;
     uint8_t pcm_buffer[len];
     while (media_tracker.queue.available() == 0) {
       size_t bytes = p_in->readBytes(pcm_buffer, len);
@@ -871,7 +875,7 @@ protected:
       LOGI("Enable Volume Change notification");
       avrcp_controller_enable_notification(
           media_tracker.avrcp_cid, AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
-      LOGI("Enable Battery Status Change notification\n");
+      LOGI("Enable Battery Status Change notification");
       avrcp_controller_enable_notification(
           media_tracker.avrcp_cid,
           AVRCP_NOTIFICATION_EVENT_BATT_STATUS_CHANGED);
