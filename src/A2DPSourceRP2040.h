@@ -132,18 +132,20 @@ protected:
     uint8_t stream_opened;
     uint16_t avrcp_cid;
 
-    uint32_t time_audio_data_sent; // ms
-    uint32_t acc_num_missed_samples;
-    uint32_t samples_ready;
+    // uint32_t time_audio_data_sent; // ms
+    // uint32_t acc_num_missed_samples;
+    // uint32_t samples_ready;
     btstack_timer_source_t audio_timer;
-    uint8_t streaming;
     int max_media_payload_size;
 
     RingBuffer<uint8_t> rb{SBC_STORAGE_SIZE};
     QueueStream<uint8_t> queue{rb};
-    volatile bool sbc_is_busy = false;
+    bool is_streaming = false;
+    bool sbc_is_busy = false;
 
+#ifndef HAVE_BTSTACK_STDIN
     uint8_t volume;
+#endif
   } media_tracker;
 
 
@@ -346,7 +348,7 @@ protected:
   void source_a2dp_configure_sample_rate(int sample_rate) {
     TRACEI();
     current_sample_rate = sample_rate;
-    media_tracker.samples_ready = 0;
+    //media_tracker.samples_ready = 0;
 
     // set encoder parameters
     sbc_encoder.setSubbands(sbc_configuration.subbands);
@@ -373,6 +375,7 @@ protected:
     }
 
     // start queue stream
+    media_tracker.queue.clear();
     media_tracker.queue.begin();
 
   }
@@ -442,23 +445,25 @@ protected:
     btstack_run_loop_add_timer(&context->audio_timer);
     uint32_t now = btstack_run_loop_get_time_ms();
 
-    uint32_t update_period_ms = AUDIO_TIMEOUT_MS;
-    if (context->time_audio_data_sent > 0) {
-      update_period_ms = now - context->time_audio_data_sent;
-    }
+    // uint32_t update_period_ms = AUDIO_TIMEOUT_MS;
+    // if (context->time_audio_data_sent > 0) {
+    //   update_period_ms = now - context->time_audio_data_sent;
+    // }
 
-    uint32_t num_samples = (update_period_ms * current_sample_rate) / 1000;
-    context->acc_num_missed_samples +=
-        (update_period_ms * current_sample_rate) % 1000;
+    // uint32_t num_samples = (update_period_ms * current_sample_rate) / 1000;
+    // context->acc_num_missed_samples +=
+    //     (update_period_ms * current_sample_rate) % 1000;
 
-    while (context->acc_num_missed_samples >= 1000) {
-      num_samples++;
-      context->acc_num_missed_samples -= 1000;
-    }
-    context->time_audio_data_sent = now;
-    context->samples_ready += num_samples;
+    // while (context->acc_num_missed_samples >= 1000) {
+    //   num_samples++;
+    //   context->acc_num_missed_samples -= 1000;
+    // }
+    // context->time_audio_data_sent = now;
+    // context->samples_ready += num_samples;
 
     if (context->sbc_is_busy)
+      return;
+    if (!context->is_streaming)
       return;
 
     a2dp_arduino_fill_sbc_audio_buffer(context);
@@ -475,7 +480,7 @@ protected:
         a2dp_max_media_payload_size(context->a2dp_cid, context->local_seid),
         SBC_STORAGE_SIZE);
     context->sbc_is_busy = false;
-    context->streaming = 1;
+    context->is_streaming = true;
     btstack_run_loop_remove_timer(&context->audio_timer);
     btstack_run_loop_set_timer_handler(&context->audio_timer,
                                        source_a2dp_audio_timeout_handler);
@@ -486,10 +491,10 @@ protected:
 
   void a2dp_arduino_timer_stop(a2dp_media_sending_context_t *context) {
     TRACED();
-    context->time_audio_data_sent = 0;
-    context->acc_num_missed_samples = 0;
-    context->samples_ready = 0;
-    context->streaming = 1;
+    // context->time_audio_data_sent = 0;
+    // context->acc_num_missed_samples = 0;
+    // context->samples_ready = 0;
+    context->is_streaming = true;
     context->sbc_is_busy = false;
     btstack_run_loop_remove_timer(&context->audio_timer);
   }
@@ -620,8 +625,9 @@ protected:
         break;
       }
       media_tracker.a2dp_cid = cid;
+#ifndef HAVE_BTSTACK_STDIN
       media_tracker.volume = 32;
-
+#endif
       LOGI("A2DP Source: Connected to address %s, a2dp cid 0x%02x, local "
              "seid 0x%02x.",
              bd_addr_to_str(address), media_tracker.a2dp_cid,
