@@ -72,8 +72,6 @@ static void stdin_process(char cmd);
 
 namespace a2dp_rp2040 {
 
-enum MetadataType {MDTitle, MDArtist, MDAlbum, MDGenre, MDPlaybackPosMs, MDTrack, MDTracks, MDSongLen, MDSongPos};
-
 /**
  * @brief A2DPSink for the RP2040
  * @author Phil Schatzmann
@@ -123,34 +121,7 @@ public:
     dec_stream.end();
   }
 
-  /// Sets the volume
-  bool setVolume(uint8_t volPercent) {
-    TRACEI();
-    volume_percentage = volPercent;
-    if (volume_percentage > 100) {
-      volume_percentage = 100;
-    }
-    if (volume_percentage < 0) {
-      volume_percentage = 0;
-    }
-    int volume = volume_percentage * 127 / 100;
-    int status = avrcp_target_volume_changed(
-        a2dp_sink_arduino_avrcp_connection.avrcp_cid, volume);
-    avrcp_volume_changed(volume);
-    return status == 0;
-  }
 
-  /// Provides the actual volume (as %) in the range from 0 to 100
-  uint8_t volume() { return volume_percentage; }
-
-  /// Defines the callback method to receive metadata events
-  void setMetadataCallback(void (*callback)(MetadataType type, const char *data, uint32_t value)) {
-    metadata_callback = callback;
-  }
-
-  bool isPlaying() {
-    return a2dp_sink_arduino_avrcp_connection.playing;
-  }
 
 protected:
   friend void sink_hci_packet_handler(uint8_t packet_type, uint16_t channel,
@@ -172,9 +143,7 @@ protected:
   const char *a2dp_name = "rp2040";
   AdapterAudioStreamToAudioPrint out_print;
   EncodedAudioPrint dec_stream;
-  VolumeStream volume_stream;
   SBCDecoder sbc_decoder;
-  void (*metadata_callback)(MetadataType type, const char *data, uint32_t value) = nullptr;
 
   btstack_packet_callback_registration_t hci_event_callback_registration;
 
@@ -203,7 +172,6 @@ protected:
   int request_frames;
 
   // sink state
-  int volume_percentage = 100;
   avrcp_battery_status_t battery_status = AVRCP_BATTERY_STATUS_WARNING;
 
   struct media_codec_configuration_sbc_t {
@@ -244,7 +212,14 @@ protected:
     bool playing;
   } a2dp_sink_arduino_avrcp_connection;
 
-  int get_avrcp_cid(){ return a2dp_sink_arduino_avrcp_connection.avrcp_cid; }
+  int16_t get_max_input_amplitude() override { return MAX_VOLUME_RECEIVED;}
+
+  int get_avrcp_cid() { return a2dp_sink_arduino_avrcp_connection.avrcp_cid; }
+  
+  void set_playing(bool playing) override {
+    is_playing = playing;
+    a2dp_sink_arduino_avrcp_connection.playing = playing;
+  }
 
 
   /* @section Main Application Setup
@@ -613,8 +588,7 @@ protected:
           connection->avrcp_cid,
           AVRCP_NOTIFICATION_EVENT_PLAYBACK_STATUS_CHANGED);
       avrcp_controller_enable_notification(
-          connection->avrcp_cid,
-          AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
+          connection->avrcp_cid, AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
       avrcp_controller_enable_notification(
           connection->avrcp_cid,
           AVRCP_NOTIFICATION_EVENT_NOW_PLAYING_CONTENT_CHANGED);
@@ -633,186 +607,6 @@ protected:
     }
   }
 
-  void local_sink_avrcp_controller_packet_handler(uint8_t packet_type,
-                                                  uint16_t channel,
-                                                  uint8_t *packet,
-                                                  uint16_t size) {
-    TRACED();
-    UNUSED(channel);
-    UNUSED(size);
-
-    // helper to print c strings
-    uint8_t avrcp_subevent_value[256];
-    uint8_t play_status;
-
-    a2dp_sink_arduino_avrcp_connection_t *avrcp_connection =
-        &a2dp_sink_arduino_avrcp_connection;
-
-    if (packet_type != HCI_EVENT_PACKET)
-      return;
-    if (hci_event_packet_get_type(packet) != HCI_EVENT_AVRCP_META)
-      return;
-    if (avrcp_connection->avrcp_cid == 0)
-      return;
-
-    memset(avrcp_subevent_value, 0, sizeof(avrcp_subevent_value));
-    switch (packet[2]) {
-    case AVRCP_SUBEVENT_NOTIFICATION_PLAYBACK_POS_CHANGED: {
-      uint32_t pos_ms = avrcp_subevent_notification_playback_pos_changed_get_playback_position_ms(packet);
-      LOGI( "AVRCP Controller: Playback position changed, position %d ms", (unsigned int) pos_ms);
-      if (metadata_callback)
-        metadata_callback(MDPlaybackPosMs, nullptr, pos_ms);
-      } break;
-    case AVRCP_SUBEVENT_NOTIFICATION_PLAYBACK_STATUS_CHANGED:
-      LOGI(
-          "AVRCP Controller: Playback status changed %s\n",
-          avrcp_play_status2str(
-              avrcp_subevent_notification_playback_status_changed_get_play_status(
-                  packet)));
-      play_status =
-          avrcp_subevent_notification_playback_status_changed_get_play_status(
-              packet);
-      switch (play_status) {
-      case AVRCP_PLAYBACK_STATUS_PLAYING:
-        avrcp_connection->playing = true;
-        break;
-      default:
-        avrcp_connection->playing = false;
-        break;
-      }
-      LOGI("AVRCP Controller: Playback status changed %s",
-           avrcp_play_status2str(play_status));
-      return;
-    case AVRCP_SUBEVENT_NOTIFICATION_NOW_PLAYING_CONTENT_CHANGED:
-      LOGI("AVRCP Controller: Playing content changed");
-      return;
-    case AVRCP_SUBEVENT_NOTIFICATION_TRACK_CHANGED:
-      LOGI("AVRCP Controller: Track changed");
-      return;
-    case AVRCP_SUBEVENT_NOTIFICATION_AVAILABLE_PLAYERS_CHANGED:
-      LOGI("AVRCP Controller: Changed");
-      return;
-    case AVRCP_SUBEVENT_SHUFFLE_AND_REPEAT_MODE: {
-      uint8_t shuffle_mode =
-          avrcp_subevent_shuffle_and_repeat_mode_get_shuffle_mode(packet);
-      uint8_t repeat_mode =
-          avrcp_subevent_shuffle_and_repeat_mode_get_repeat_mode(packet);
-      LOGI("AVRCP Controller: %s, %s", avrcp_shuffle2str(shuffle_mode),
-           avrcp_repeat2str(repeat_mode));
-      break;
-    }
-    case AVRCP_SUBEVENT_NOW_PLAYING_TRACK_INFO: {
-      uint32_t val = avrcp_subevent_now_playing_track_info_get_track(packet);
-      LOGI("AVRCP Controller:     Track: %d", val);
-      if (metadata_callback)
-        metadata_callback(MDTrack, nullptr, val);
-      } break;
-
-    case AVRCP_SUBEVENT_NOW_PLAYING_TOTAL_TRACKS_INFO: {
-      uint32_t val = avrcp_subevent_now_playing_total_tracks_info_get_total_tracks( packet);
-      LOGI("AVRCP Controller:     Total Tracks: %d", val);
-      if (metadata_callback)
-        metadata_callback(MDTracks, nullptr, val);
-      } break;
-
-    case AVRCP_SUBEVENT_NOW_PLAYING_TITLE_INFO:
-      if (avrcp_subevent_now_playing_title_info_get_value_len(packet) > 0) {
-        memcpy(avrcp_subevent_value,
-               avrcp_subevent_now_playing_title_info_get_value(packet),
-               avrcp_subevent_now_playing_title_info_get_value_len(packet));
-        LOGI("AVRCP Controller:     Title: %s", avrcp_subevent_value);
-        if (metadata_callback)
-          metadata_callback(MDTitle, (const char*)avrcp_subevent_value, 0);
-      }
-      break;
-
-    case AVRCP_SUBEVENT_NOW_PLAYING_ARTIST_INFO:
-      if (avrcp_subevent_now_playing_artist_info_get_value_len(packet) > 0) {
-        memcpy(avrcp_subevent_value,
-               avrcp_subevent_now_playing_artist_info_get_value(packet),
-               avrcp_subevent_now_playing_artist_info_get_value_len(packet));
-        LOGI("AVRCP Controller:     Artist: %s", avrcp_subevent_value);
-        if (metadata_callback)
-          metadata_callback(MDArtist, (const char*)avrcp_subevent_value, 0);
-      }
-      break;
-
-    case AVRCP_SUBEVENT_NOW_PLAYING_ALBUM_INFO:
-      if (avrcp_subevent_now_playing_album_info_get_value_len(packet) > 0) {
-        memcpy(avrcp_subevent_value,
-               avrcp_subevent_now_playing_album_info_get_value(packet),
-               avrcp_subevent_now_playing_album_info_get_value_len(packet));
-        LOGI("AVRCP Controller:     Album: %s", avrcp_subevent_value);
-        if (metadata_callback)
-          metadata_callback(MDAlbum, (const char*)avrcp_subevent_value, 0);
-      }
-      break;
-
-    case AVRCP_SUBEVENT_NOW_PLAYING_GENRE_INFO:
-      if (avrcp_subevent_now_playing_genre_info_get_value_len(packet) > 0) {
-        memcpy(avrcp_subevent_value,
-               avrcp_subevent_now_playing_genre_info_get_value(packet),
-               avrcp_subevent_now_playing_genre_info_get_value_len(packet));
-        LOGI("AVRCP Controller:     Genre: %s", avrcp_subevent_value);
-        if (metadata_callback)
-          metadata_callback(MDGenre, (const char*)avrcp_subevent_value, 0);
-      }
-      break;
-
-    case AVRCP_SUBEVENT_PLAY_STATUS:{
-      uint32_t len = avrcp_subevent_play_status_get_song_length(packet);
-      uint32_t pos = avrcp_subevent_play_status_get_song_position(packet);
-      LOGI("AVRCP Controller: Song length %" PRIu32
-           " ms, Song position %" PRIu32 " ms, Play status %s", len, pos,
-           avrcp_play_status2str(avrcp_subevent_play_status_get_play_status(packet)));
-
-      if (metadata_callback){
-        metadata_callback(MDSongLen, nullptr, len);
-        metadata_callback(MDSongPos, nullptr, pos);
-      }
-      } break;
-
-    case AVRCP_SUBEVENT_OPERATION_COMPLETE:
-      LOGI("AVRCP Controller: %s complete",
-           avrcp_operation2str(
-               avrcp_subevent_operation_complete_get_operation_id(packet)));
-      break;
-
-    case AVRCP_SUBEVENT_OPERATION_START:
-      LOGI("AVRCP Controller: %s start",
-           avrcp_operation2str(
-               avrcp_subevent_operation_start_get_operation_id(packet)));
-      break;
-
-    case AVRCP_SUBEVENT_NOTIFICATION_EVENT_TRACK_REACHED_END:
-      LOGI("AVRCP Controller: Track reached end");
-      break;
-
-    case AVRCP_SUBEVENT_PLAYER_APPLICATION_VALUE_RESPONSE:
-      LOGI(
-          "AVRCP Controller: Set Player App Value %s",
-          avrcp_ctype2str(
-              avrcp_subevent_player_application_value_response_get_command_type(
-                  packet)));
-      break;
-
-    default:
-      break;
-    }
-  }
-
-  void avrcp_volume_changed(uint8_t volume) {
-    // calculate eff volume factor
-    float max_current = MAX_VOLUME_RECEIVED;
-    float max_factor = 32767.0f / max_current;
-    float vol_float = 0.01f * volume_percentage;
-    // We adjust the volume: if we receive only max amplitude of 2500 we can
-    // multiply the values by a factor of 13
-    float factor = mapFloat(vol_float, 0.0, 1.0, 0.0, max_factor);
-    LOGI("avrcp_volume_changed: %d -> %f", volume, factor);
-    // adjust volume
-    volume_stream.setVolume(factor);
-  }
 
   void local_sink_avrcp_target_packet_handler(uint8_t packet_type,
                                               uint16_t channel, uint8_t *packet,
@@ -1334,8 +1128,8 @@ void sink_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
 
 void sink_avrcp_controller_packet_handler(uint8_t packet_type, uint16_t channel,
                                           uint8_t *packet, uint16_t size) {
-  A2DPSink.local_sink_avrcp_controller_packet_handler(packet_type, channel,
-                                                      packet, size);
+  A2DPSink.local_avrcp_controller_packet_handler(packet_type, channel, packet,
+                                                 size);
 }
 
 void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,

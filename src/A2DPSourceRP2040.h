@@ -82,7 +82,9 @@ public:
     TRACEI();
     p_in = &in;
     remote_name = name;
-    encoder_stream.setOutput(&queue);
+    // setup output chain: encoder_stream -> volume_stream -> queue
+    volume_stream.setTarget(queue);
+    encoder_stream.setOutput(&volume_stream);
     encoder_stream.setEncoder(&sbc_encoder);
     setupTrack();
     int err = a2dp_source_and_avrcp_services_init();
@@ -195,6 +197,7 @@ protected:
   int data_source = 0;
   avrcp_play_status_info_t play_info;
 
+  int16_t get_max_input_amplitude() override { return MAX_VOLUME_INPUT;}
 
   virtual int get_avrcp_cid() { return media_tracker.a2dp_cid;}
 
@@ -378,17 +381,6 @@ protected:
   void produce_audio(int16_t *pcm_buffer, int num_samples) {
     TRACED();
     p_in->readBytes((uint8_t *)pcm_buffer, num_samples * 2);
-
-#ifdef VOLUME_REDUCTION
-    int i;
-    for (i = 0; i < num_samples * 2; i++) {
-      if (pcm_buffer[i] > 0) {
-        pcm_buffer[i] = pcm_buffer[i] >> VOLUME_REDUCTION;
-      } else {
-        pcm_buffer[i] = -((-pcm_buffer[i]) >> VOLUME_REDUCTION);
-      }
-    }
-#endif
   }
 
   int a2dp_arduino_fill_sbc_audio_buffer(a2dp_media_sending_context_t *context) {
@@ -973,46 +965,6 @@ protected:
     }
   }
 
-  void local_avrcp_controller_packet_handler(uint8_t packet_type,
-                                             uint16_t channel, uint8_t *packet,
-                                             uint16_t size) {
-    TRACED();
-    UNUSED(channel);
-    UNUSED(size);
-
-    if (packet_type != HCI_EVENT_PACKET)
-      return;
-    if (hci_event_packet_get_type(packet) != HCI_EVENT_AVRCP_META)
-      return;
-    if (!media_tracker.avrcp_cid)
-      return;
-
-    switch (packet[2]) {
-    case AVRCP_SUBEVENT_NOTIFICATION_VOLUME_CHANGED:
-      LOGI("AVRCP Controller: Notification Absolute Volume %d %%",
-             avrcp_subevent_notification_volume_changed_get_absolute_volume(
-                 packet) *
-                 100 / 127);
-      break;
-    case AVRCP_SUBEVENT_NOTIFICATION_EVENT_BATT_STATUS_CHANGED:
-      // see avrcp_battery_status_t
-      LOGI(
-          "AVRCP Controller: Notification Battery Status %d",
-          avrcp_subevent_notification_event_batt_status_changed_get_battery_status(
-              packet));
-      break;
-    case AVRCP_SUBEVENT_NOTIFICATION_STATE:
-      LOGI("AVRCP Controller: Notification %s - %s",
-             avrcp_event2str(
-                 avrcp_subevent_notification_state_get_event_id(packet)),
-             avrcp_subevent_notification_state_get_enabled(packet) != 0
-                 ? "enabled"
-                 : "disabled");
-      break;
-    default:
-      break;
-    }
-  }
 
 #ifdef HAVE_BTSTACK_STDIN
   void show_usage(void) {
