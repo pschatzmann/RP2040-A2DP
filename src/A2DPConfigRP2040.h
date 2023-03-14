@@ -14,10 +14,6 @@
 #error Bluetooth was not enabled!
 #endif
 
-#ifdef ENABLE_BLE
-#undef ENABLE_BLE
-#endif
-
 // Common
 #define BTSTACK_FILE__ "a2dp_rp2040"
 #define AVRCP_BROWSING_ENABLED

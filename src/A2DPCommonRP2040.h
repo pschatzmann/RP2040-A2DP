@@ -163,11 +163,14 @@ public:
   }
 
   bool isPlaying() { return is_playing; }
+  bool isBLEEnabled() {return is_ble_enabled;}
+  void setBLEEnabled(bool active){is_ble_enabled = active;}
 
 protected:
   VolumeStream volume_stream;
   int volume_percentage = 100;
   bool is_playing = false;
+  bool is_ble_enabled = false;
   void (*metadata_callback)(MetadataType type, const char *data,
                             uint32_t value) = nullptr;
 

@@ -253,11 +253,11 @@ protected:
 
     l2cap_init();
 
-#ifdef ENABLE_BLE
-    // Initialize LE Security Manager. Needed for cross-transport key
-    // derivation
-    sm_init();
-#endif
+    if isBLEEnabled()   {
+      // Initialize LE Security Manager. Needed for cross-transport key
+      // derivation
+      sm_init();
+    }  
 
     // Initialize AVDTP Sink
     a2dp_sink_init();
