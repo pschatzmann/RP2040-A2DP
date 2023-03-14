@@ -72,11 +72,12 @@ $(function() {
   <div class="headertitle"><div class="title">RP2040 A2DP </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="md_README"></a>The RP2040 W is a microcontroller that provides a Bluetooth A2DP API which can be used to receive and process audio data e.g. from your Mobile Phone. The output is a PCM data stream decoded from SBC format.</p>
-<p><img src="https://www.pschatzmann.ch/wp-content/uploads/2023/03/raspberry-pi-pico-w-1.jpg" alt="RP2040W" class="inline"/></p>
+<div class="textblock"><p><a class="anchor" id="md_README"></a>The RP2040 W is a microcontroller that provides a Bluetooth A2DP API which can be used to receive and process <b>audio data</b> e.g. from your Mobile Phone. The output is a PCM data stream decoded from SBC format.</p>
+<p>The goal of this project is to make the <b>full A2DP functionality available for the RP2040</b>.</p>
+<p><img src="https://pschatzmann.github.io/RP2040-A2DP/docs/img/RASP_PI_PICO_W_01.jpeg" alt="" width="20%" class="inline"/></p>
 <p>I am currently already providing an <a href="https://github.com/pschatzmann/ESP32-A2DP">A2DP library for the ESP32</a>.</p>
 <p>The RP2040 W uses the <a href="https://github.com/bluekitchen/btstack">bluekitchen btstack</a>. There, you can find examples for a <a href="https://github.com/bluekitchen/btstack/blob/master/example/a2dp_source_demo.c">A2DP source</a> and <a href="https://github.com/bluekitchen/btstack/blob/master/example/a2dp_sink_demo.c">A2DP sink</a>.</p>
-<p>However, it seems that no SBC codec is not provided with the RP2040. <br  />
+<p>However, it seems that no SBC codec is provided with the RP2040. <br  />
 </p>
 <p>I changed the examples to use C++ classes. I also added a proper integration with the <a href="https://github.com/pschatzmann/arduino-audio-tools">Arduino Audio Tools</a> so that you can use the</p>
 <ul>
@@ -85,21 +86,20 @@ $(function() {
 <li>SBC codec</li>
 </ul>
 <p>Currently I am supporting only SBC, but it should be quite easy to extend the functionality to support other codecs as well.</p>
-<p>The goal of this project is to make the <b>full A2DP functionality available for the RP2040</b>.</p>
 <h1><a class="anchor" id="autotoc_md1"></a>
 Documentation</h1>
 <ul>
 <li><a href="https://pschatzmann.github.io/RP2040-A2DP/docs/html/annotated.html">Classes</a></li>
+<li>Further information about the RP2040 Bluetooth integration can be found in <a href="https://arduino-pico.readthedocs.io/en/latest/bluetooth.html">the pico documentation</a>.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md2"></a>
 Dependencies</h1>
 <p>You need to install the following projects:</p>
 <ul>
+<li><a href="https://github.com/pschatzmann/RP2040-A2DP">https://github.com/pschatzmann/RP2040-A2DP</a></li>
 <li><a href="https://github.com/pschatzmann/arduino-audio-tools">https://github.com/pschatzmann/arduino-audio-tools</a></li>
-<li><a href="https://github.com/pschatzmann/arduino-libsbc">https://github.com/pschatzmann/arduino-libsbc</a></li>
-<li><a href="https://github.com/pschatzmann/ESP32-A2DP">https://github.com/pschatzmann/ESP32-A2DP</a></li>
+<li><a href="https://github.com/pschatzmann/arduino-libsbc">https://github.com/pschatzmann/arduino-libsbc</a> </li>
 </ul>
-<p>Further information about the RP2040 Bluetooth integration can be found in <a href="https://arduino-pico.readthedocs.io/en/latest/bluetooth.html">the documentation</a>. </p>
 </div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
