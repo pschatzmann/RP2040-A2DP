@@ -1081,27 +1081,6 @@ protected:
   }
 #endif
 
-  // int btstack_main(int argc, const char * argv[]);
-  // int btstack_main(int argc, const char * argv[]){
-  //     UNUSED(argc);
-  //     (void)argv;
-
-  //     a2dp_and_avrcp_setup();
-
-  // #ifdef HAVE_BTSTACK_STDIN
-  //     // parse human-readable Bluetooth address
-  //     sscanf_bd_addr(device_addr_string, device_addr);
-  //     btstack_stdin_setup(stdin_process);
-  // #endif
-
-  //     // turn on!
-  //     printf("Starting BTstack ...\n");
-  //     hci_power_control(HCI_POWER_ON);
-  //     return 0;
-  // }
-
-  /* EXAMPLE_END */
-
 } A2DPSink;
 
 // -- Implement Callback functions which forward calls to A2DPSink

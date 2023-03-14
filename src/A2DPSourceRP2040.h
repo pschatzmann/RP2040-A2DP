@@ -687,21 +687,8 @@ protected:
         break;
       }
       dump_sbc_configuration(&sbc_configuration);
-
-      // TODO SBC encoder Init
+      // Setup SBC decoder 
       source_a2dp_configure_sample_rate(sbc_configuration.sampling_frequency);
-      // auto cfg = encoder_stream.defaultConfig();
-      // cfg.sample_rate = sbc_configuration.sampling_frequency;
-      // cfg.channels = NUM_CHANNELS;
-      // encoder_stream.begin(cfg);
-
-      // btstack_sbc_encoder_init(
-      //     &sbc_encoder_state, SBC_MODE_STANDARD,
-      //     sbc_configuration.block_length, sbc_configuration.subbands,
-      //     sbc_configuration.allocation_method,
-      //     sbc_configuration.sampling_frequency,
-      //     sbc_configuration.max_bitpool_value,
-      //     sbc_configuration.channel_mode);
       break;
     }
 
@@ -1153,19 +1140,6 @@ protected:
     }
   }
 #endif
-
-  // int btstack_main(int argc, const char * argv[]);
-  // int btstack_main(int argc, const char * argv[]){
-  //     (void)argc;
-  //     (void)argv;
-
-  //     int err = a2dp_source_and_avrcp_services_init();
-  //     if (err) return err;
-  //     // turn on!
-  //     hci_power_control(HCI_POWER_ON);
-  //     return 0;
-  // }
-  /* EXAMPLE_END */
 
   void setupTrack() {
     TRACED();
