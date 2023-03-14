@@ -78,6 +78,17 @@ public:
     return begin(in, nullptr);
   }
 
+  bool begin(AudioStream &in) {
+    return begin(in, nullptr);
+  }
+
+  bool begin(AudioStream &in, const char* name) {
+    TRACEI();
+    p_input = &in;
+    Stream& stream = in;
+    return begin(stream, name);
+  }
+
   bool begin(Stream &in, const char* name) {
     TRACEI();
     volume_stream.setStream(in);
@@ -151,6 +162,7 @@ protected:
   Stream *p_in = nullptr;
   SBCEncoder sbc_encoder;
   EncodedAudioStream encoder_stream;
+  AudioStream *p_input = nullptr;
 
   btstack_packet_callback_registration_t hci_event_callback_registration;
 
@@ -343,7 +355,7 @@ protected:
   /* LISTING_END */
 
   void source_a2dp_configure_sample_rate(int sample_rate) {
-    TRACED();
+    TRACEI();
     current_sample_rate = sample_rate;
     media_tracker.samples_ready = 0;
 
@@ -353,18 +365,23 @@ protected:
     sbc_encoder.setBlocks(sbc_configuration.block_length);
     sbc_encoder.setAllocationMethod(sbc_configuration.allocation_method);
 
-
+    // setup ecoder_stream
     auto cfg = encoder_stream.defaultConfig();
     cfg.sample_rate = sample_rate;
     cfg.channels = NUM_CHANNELS;
     encoder_stream.begin(cfg);
 
-    // setup volume output
+    // setup volume input
     auto vcfg = volume_stream.defaultConfig();
     vcfg.copyFrom(cfg);
     vcfg.volume = 0.01f * volume_percentage;
     volume_stream.begin(vcfg);
     avrcp_volume_changed(volume_percentage);   
+
+    // configure input if possible
+    if (p_input!=nullptr){
+      p_input->setAudioInfo(cfg);
+    }
 
     // start queue stream
     media_tracker.queue.begin();
