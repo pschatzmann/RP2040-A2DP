@@ -74,6 +74,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
 <a href="#pro-attribs">Protected Attributes</a> &#124;
@@ -97,6 +98,11 @@ Inheritance diagram for a2dp_rp2040::A2DPCommon:</div>
   </map>
 </div></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structa2dp__rp2040_1_1_a2_d_p_common_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a40e26e75de3fbc8070389c721cab493d"><td class="memItemLeft" align="right" valign="top"><a id="a40e26e75de3fbc8070389c721cab493d" name="a40e26e75de3fbc8070389c721cab493d"></a>
@@ -148,6 +154,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>rewind</b> (bool star
 <tr class="memitem:a9ab53b0a2a008bb973dc38243330f215"><td class="memItemLeft" align="right" valign="top"><a id="a9ab53b0a2a008bb973dc38243330f215" name="a9ab53b0a2a008bb973dc38243330f215"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isPlaying</b> ()</td></tr>
 <tr class="separator:a9ab53b0a2a008bb973dc38243330f215"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acacfa6bc1b72574ce3ad392a39bc930e"><td class="memItemLeft" align="right" valign="top"><a id="acacfa6bc1b72574ce3ad392a39bc930e" name="acacfa6bc1b72574ce3ad392a39bc930e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isBLEEnabled</b> ()</td></tr>
+<tr class="separator:acacfa6bc1b72574ce3ad392a39bc930e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addc37548b046ad17e2a57b4c89b9dcbc"><td class="memItemLeft" align="right" valign="top"><a id="addc37548b046ad17e2a57b4c89b9dcbc" name="addc37548b046ad17e2a57b4c89b9dcbc"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setBLEEnabled</b> (bool active)</td></tr>
+<tr class="separator:addc37548b046ad17e2a57b4c89b9dcbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
@@ -157,6 +169,9 @@ virtual int&#160;</td><td class="memItemRight" valign="bottom"><b>get_avrcp_cid<
 <tr class="memitem:a9beae5bec13edaee71d7b0a3caa7be31"><td class="memItemLeft" align="right" valign="top"><a id="a9beae5bec13edaee71d7b0a3caa7be31" name="a9beae5bec13edaee71d7b0a3caa7be31"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>set_playing</b> (bool playing)</td></tr>
 <tr class="separator:a9beae5bec13edaee71d7b0a3caa7be31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25a45764cde5aef91e5be6d31dd3722c"><td class="memItemLeft" align="right" valign="top"><a id="a25a45764cde5aef91e5be6d31dd3722c" name="a25a45764cde5aef91e5be6d31dd3722c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_valid_playstatus</b> (int status)</td></tr>
+<tr class="separator:a25a45764cde5aef91e5be6d31dd3722c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0424a8193acc66a923ca585e202ac88a"><td class="memItemLeft" align="right" valign="top"><a id="a0424a8193acc66a923ca585e202ac88a" name="a0424a8193acc66a923ca585e202ac88a"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>local_avrcp_controller_packet_handler</b> (uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size)</td></tr>
 <tr class="separator:a0424a8193acc66a923ca585e202ac88a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -178,6 +193,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>volume_percentage</b> 
 <tr class="memitem:a3586f027c0595461416790962d505f73"><td class="memItemLeft" align="right" valign="top"><a id="a3586f027c0595461416790962d505f73" name="a3586f027c0595461416790962d505f73"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_playing</b> = false</td></tr>
 <tr class="separator:a3586f027c0595461416790962d505f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae43e7e151b6d0954dc3a75e072702284"><td class="memItemLeft" align="right" valign="top"><a id="ae43e7e151b6d0954dc3a75e072702284" name="ae43e7e151b6d0954dc3a75e072702284"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_ble_enabled</b> = false</td></tr>
+<tr class="separator:ae43e7e151b6d0954dc3a75e072702284"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae40bb469bef7b29fc9b21c20026f5502"><td class="memItemLeft" align="right" valign="top"><a id="ae40bb469bef7b29fc9b21c20026f5502" name="ae40bb469bef7b29fc9b21c20026f5502"></a>
 void(*&#160;</td><td class="memItemRight" valign="bottom"><b>metadata_callback</b> )(MetadataType type, const char *data, uint32_t value) = nullptr</td></tr>
 <tr class="separator:ae40bb469bef7b29fc9b21c20026f5502"><td class="memSeparator" colspan="2">&#160;</td></tr>

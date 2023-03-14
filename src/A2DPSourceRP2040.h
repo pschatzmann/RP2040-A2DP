@@ -147,23 +147,12 @@ protected:
   } media_tracker;
 
 
-  struct media_codec_configuration_sbc_t {
-    int reconfigure;
-    int num_channels;
-    int sampling_frequency;
-    int block_length;
-    int subbands;
-    int min_bitpool_value;
-    int max_bitpool_value;
-    btstack_sbc_channel_mode_t channel_mode;
-    btstack_sbc_allocation_method_t allocation_method;
-  } sbc_configuration;
-
   Stream *p_in = nullptr;
   SBCEncoder sbc_encoder;
   EncodedAudioStream encoder_stream;
   AudioStream *p_input = nullptr;
 
+  media_codec_configuration_sbc_t sbc_configuration;
   btstack_packet_callback_registration_t hci_event_callback_registration;
 
   const int A2DP_SOURCE_arduino_INQUIRY_DURATION_1280MS = 12;

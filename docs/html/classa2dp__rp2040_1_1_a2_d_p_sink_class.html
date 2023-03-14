@@ -107,8 +107,6 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structa2dp__rp2040_1_1_a2_d_p_sink_class_1_1a2dp__sink__arduino__stream__endpoint__t.html">a2dp_sink_arduino_stream_endpoint_t</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structa2dp__rp2040_1_1_a2_d_p_sink_class_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a></td></tr>
-<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -176,6 +174,12 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>rewind</b> (bool star
 <tr class="memitem:a9ab53b0a2a008bb973dc38243330f215"><td class="memItemLeft" align="right" valign="top"><a id="a9ab53b0a2a008bb973dc38243330f215" name="a9ab53b0a2a008bb973dc38243330f215"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isPlaying</b> ()</td></tr>
 <tr class="separator:a9ab53b0a2a008bb973dc38243330f215"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acacfa6bc1b72574ce3ad392a39bc930e"><td class="memItemLeft" align="right" valign="top"><a id="acacfa6bc1b72574ce3ad392a39bc930e" name="acacfa6bc1b72574ce3ad392a39bc930e"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isBLEEnabled</b> ()</td></tr>
+<tr class="separator:acacfa6bc1b72574ce3ad392a39bc930e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:addc37548b046ad17e2a57b4c89b9dcbc"><td class="memItemLeft" align="right" valign="top"><a id="addc37548b046ad17e2a57b4c89b9dcbc" name="addc37548b046ad17e2a57b4c89b9dcbc"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setBLEEnabled</b> (bool active)</td></tr>
+<tr class="separator:addc37548b046ad17e2a57b4c89b9dcbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
 Protected Types</h2></td></tr>
@@ -198,7 +202,7 @@ Protected Member Functions</h2></td></tr>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_and_avrcp_setup</b> (void)</td></tr>
 <tr class="separator:a992f17b623a9dc944cac7c6db224199e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad0f14093c8ed0ea47cbc5eb8b25f65d7"><td class="memItemLeft" align="right" valign="top"><a id="ad0f14093c8ed0ea47cbc5eb8b25f65d7" name="ad0f14093c8ed0ea47cbc5eb8b25f65d7"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_init</b> (<a class="el" href="structa2dp__rp2040_1_1_a2_d_p_sink_class_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a> *configuration)</td></tr>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_init</b> (<a class="el" href="structa2dp__rp2040_1_1_a2_d_p_common_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a> *configuration)</td></tr>
 <tr class="separator:ad0f14093c8ed0ea47cbc5eb8b25f65d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0fba7569a36a4aae32b5c2212ce339c3"><td class="memItemLeft" align="right" valign="top"><a id="a0fba7569a36a4aae32b5c2212ce339c3" name="a0fba7569a36a4aae32b5c2212ce339c3"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_start</b> (void)</td></tr>
@@ -222,7 +226,7 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>read_sbc_header</b> (u
 int&#160;</td><td class="memItemRight" valign="bottom"><b>read_media_data_header</b> (uint8_t *packet, int size, int *offset, avdtp_media_packet_header_t *media_header)</td></tr>
 <tr class="separator:ab6efb42672365f1b9632a0a82420d549"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a556be9527c597dace46d20751a58eed0"><td class="memItemLeft" align="right" valign="top"><a id="a556be9527c597dace46d20751a58eed0" name="a556be9527c597dace46d20751a58eed0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dump_sbc_configuration</b> (<a class="el" href="structa2dp__rp2040_1_1_a2_d_p_sink_class_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a> *configuration)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>dump_sbc_configuration</b> (<a class="el" href="structa2dp__rp2040_1_1_a2_d_p_common_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a> *configuration)</td></tr>
 <tr class="separator:a556be9527c597dace46d20751a58eed0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2449ad22a13cdfc416321ee0f37b2ab9"><td class="memItemLeft" align="right" valign="top"><a id="a2449ad22a13cdfc416321ee0f37b2ab9" name="a2449ad22a13cdfc416321ee0f37b2ab9"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>local_sink_avrcp_packet_handler</b> (uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size)</td></tr>
@@ -236,6 +240,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>local_sink_hci_packet
 <tr class="memitem:a1b54eac6c2da501f55d19b7ba137a5ad"><td class="memItemLeft" align="right" valign="top"><a id="a1b54eac6c2da501f55d19b7ba137a5ad" name="a1b54eac6c2da501f55d19b7ba137a5ad"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>local_sink_a2dp_packet_handler</b> (uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size)</td></tr>
 <tr class="separator:a1b54eac6c2da501f55d19b7ba137a5ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25a45764cde5aef91e5be6d31dd3722c"><td class="memItemLeft" align="right" valign="top"><a id="a25a45764cde5aef91e5be6d31dd3722c" name="a25a45764cde5aef91e5be6d31dd3722c"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_valid_playstatus</b> (int status)</td></tr>
+<tr class="separator:a25a45764cde5aef91e5be6d31dd3722c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0424a8193acc66a923ca585e202ac88a"><td class="memItemLeft" align="right" valign="top"><a id="a0424a8193acc66a923ca585e202ac88a" name="a0424a8193acc66a923ca585e202ac88a"></a>
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>local_avrcp_controller_packet_handler</b> (uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size)</td></tr>
 <tr class="separator:a0424a8193acc66a923ca585e202ac88a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -312,6 +319,9 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>volume_percentage</b> 
 <tr class="memitem:a3586f027c0595461416790962d505f73"><td class="memItemLeft" align="right" valign="top"><a id="a3586f027c0595461416790962d505f73" name="a3586f027c0595461416790962d505f73"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_playing</b> = false</td></tr>
 <tr class="separator:a3586f027c0595461416790962d505f73"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae43e7e151b6d0954dc3a75e072702284"><td class="memItemLeft" align="right" valign="top"><a id="ae43e7e151b6d0954dc3a75e072702284" name="ae43e7e151b6d0954dc3a75e072702284"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>is_ble_enabled</b> = false</td></tr>
+<tr class="separator:ae43e7e151b6d0954dc3a75e072702284"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae40bb469bef7b29fc9b21c20026f5502"><td class="memItemLeft" align="right" valign="top"><a id="ae40bb469bef7b29fc9b21c20026f5502" name="ae40bb469bef7b29fc9b21c20026f5502"></a>
 void(*&#160;</td><td class="memItemRight" valign="bottom"><b>metadata_callback</b> )(MetadataType type, const char *data, uint32_t value) = nullptr</td></tr>
 <tr class="separator:ae40bb469bef7b29fc9b21c20026f5502"><td class="memSeparator" colspan="2">&#160;</td></tr>

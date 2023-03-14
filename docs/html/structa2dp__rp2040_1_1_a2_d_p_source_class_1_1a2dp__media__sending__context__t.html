@@ -115,15 +115,15 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>streaming</b></td>
 <tr class="memitem:a87a3d57b788b33c7d4a096359289ce67"><td class="memItemLeft" align="right" valign="top"><a id="a87a3d57b788b33c7d4a096359289ce67" name="a87a3d57b788b33c7d4a096359289ce67"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>max_media_payload_size</b></td></tr>
 <tr class="separator:a87a3d57b788b33c7d4a096359289ce67"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad85af5c8ce08f01395697d14bd2b64d2"><td class="memItemLeft" align="right" valign="top"><a id="ad85af5c8ce08f01395697d14bd2b64d2" name="ad85af5c8ce08f01395697d14bd2b64d2"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>sbc_storage</b> [SBC_STORAGE_SIZE]</td></tr>
-<tr class="separator:ad85af5c8ce08f01395697d14bd2b64d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52dcc8e64c7609be60d1128e9a170487"><td class="memItemLeft" align="right" valign="top"><a id="a52dcc8e64c7609be60d1128e9a170487" name="a52dcc8e64c7609be60d1128e9a170487"></a>
-uint16_t&#160;</td><td class="memItemRight" valign="bottom"><b>sbc_storage_count</b></td></tr>
-<tr class="separator:a52dcc8e64c7609be60d1128e9a170487"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac5bfe529b1304d67c77b64594dfd766b"><td class="memItemLeft" align="right" valign="top"><a id="ac5bfe529b1304d67c77b64594dfd766b" name="ac5bfe529b1304d67c77b64594dfd766b"></a>
-uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>sbc_ready_to_send</b></td></tr>
-<tr class="separator:ac5bfe529b1304d67c77b64594dfd766b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af2b96bd1397fba0d410027070245ca39"><td class="memItemLeft" align="right" valign="top"><a id="af2b96bd1397fba0d410027070245ca39" name="af2b96bd1397fba0d410027070245ca39"></a>
+RingBuffer&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>rb</b> {SBC_STORAGE_SIZE}</td></tr>
+<tr class="separator:af2b96bd1397fba0d410027070245ca39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9f2194c9d99579e75c480e99cf5249b"><td class="memItemLeft" align="right" valign="top"><a id="ae9f2194c9d99579e75c480e99cf5249b" name="ae9f2194c9d99579e75c480e99cf5249b"></a>
+QueueStream&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>queue</b> {rb}</td></tr>
+<tr class="separator:ae9f2194c9d99579e75c480e99cf5249b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a89dab693bf00558dc5fc81b583867162"><td class="memItemLeft" align="right" valign="top"><a id="a89dab693bf00558dc5fc81b583867162" name="a89dab693bf00558dc5fc81b583867162"></a>
+volatile bool&#160;</td><td class="memItemRight" valign="bottom"><b>sbc_is_busy</b> = false</td></tr>
+<tr class="separator:a89dab693bf00558dc5fc81b583867162"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab42eff4801a9b08c3a18bc984c37f352"><td class="memItemLeft" align="right" valign="top"><a id="ab42eff4801a9b08c3a18bc984c37f352" name="ab42eff4801a9b08c3a18bc984c37f352"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>volume</b></td></tr>
 <tr class="separator:ab42eff4801a9b08c3a18bc984c37f352"><td class="memSeparator" colspan="2">&#160;</td></tr>

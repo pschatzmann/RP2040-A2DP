@@ -9,13 +9,6 @@ void setup() {
   waitFor(Serial);
   AudioLogger::instance().begin(Serial, AudioLogger::Info);
 
-  // make sure that the input matches the requirements
-  auto cfg = in.defaultConfig();
-  cfg.sample_rate = 44100;
-  cfg.channels = 2;
-  cfg.bits_per_sample = 16;
-  in.begin(cfg);
-
   A2DPSource.begin(in);
 }
 

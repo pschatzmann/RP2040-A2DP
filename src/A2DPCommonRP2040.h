@@ -166,6 +166,19 @@ public:
   void setBLEEnabled(bool active) { is_ble_enabled = active; }
 
 protected:
+
+  struct media_codec_configuration_sbc_t {
+    uint8_t reconfigure;
+    uint8_t num_channels;
+    uint16_t sampling_frequency;
+    uint8_t block_length;
+    uint8_t subbands;
+    uint8_t min_bitpool_value;
+    uint8_t max_bitpool_value;
+    btstack_sbc_channel_mode_t channel_mode;
+    btstack_sbc_allocation_method_t allocation_method;
+  };
+
   VolumeStream volume_stream;
   int volume_percentage = 100;
   bool is_playing = false;
