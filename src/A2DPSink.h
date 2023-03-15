@@ -58,13 +58,13 @@
  *
  */
 // *****************************************************************************
-#include "A2DPCommonRP2040.h"
+#include "A2DPCommon.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 
-namespace a2dp_rp2040 {
+namespace btstack_a2dp {
 
 /**
  * @brief A2DPSink for the RP2040
@@ -833,4 +833,4 @@ void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
 }
 
 
-} // namespace a2dp_rp2040
+} // namespace btstack_a2dp

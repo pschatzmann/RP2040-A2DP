@@ -1,5 +1,5 @@
 #pragma once
-#include "A2DPConfigRP2040.h"
+#include "A2DPConfig.h"
 #include "bluetooth.h"
 #include "btstack.h"
 #include "btstack_defines.h"
@@ -11,7 +11,7 @@
 // #define BYTES_PER_FRAME     (2*NUM_CHANNELS)
 // #define BYTES_PER_AUDIO_SAMPLE (2 * NUM_CHANNELS)
 
-namespace a2dp_rp2040 {
+namespace btstack_a2dp {
 
 enum MetadataType {
   MDTitle,
@@ -436,4 +436,4 @@ protected:
   }
 };
 
-} // namespace a2dp_rp2040
+} // namespace btstack_a2dp

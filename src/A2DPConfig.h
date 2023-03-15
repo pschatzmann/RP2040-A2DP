@@ -15,7 +15,7 @@
 #endif
 
 // Common
-#define BTSTACK_FILE__ "a2dp_rp2040"
+#define BTSTACK_FILE__ "btstack_a2dp"
 #define AVRCP_BROWSING_ENABLED
 #define NUM_CHANNELS 2
 

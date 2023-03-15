@@ -58,14 +58,14 @@
  *
  */
 // *****************************************************************************
-#include "A2DPCommonRP2040.h"
+#include "A2DPCommon.h"
 
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
-namespace a2dp_rp2040 {
+namespace btstack_a2dp {
 
 /**
  * @brief A2DPSource for the RP2040 
