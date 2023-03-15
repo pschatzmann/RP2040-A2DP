@@ -153,6 +153,7 @@ protected:
   SBCEncoder sbc_encoder;
   EncodedAudioStream encoder_stream;
   AudioStream *p_input = nullptr;
+  bool is_streams_opened = false;
 
   media_codec_configuration_sbc_t sbc_configuration;
   btstack_packet_callback_registration_t hci_event_callback_registration;
@@ -333,23 +334,30 @@ protected:
     hci_add_event_handler(&hci_event_callback_registration);
 
     source_a2dp_configure_sample_rate(current_sample_rate);
-    data_source = 0;
 
     // Parse human readable Bluetooth address.
     sscanf_bd_addr(device_addr_string, device_addr);
 
-#ifdef HAVE_BTSTACK_STDIN
-    btstack_stdin_setup(stdin_process);
-#endif
     return 0;
   }
   /* LISTING_END */
 
   void source_a2dp_configure_sample_rate(int sample_rate) {
-    TRACEI();
-    current_sample_rate = sample_rate;
-    //media_tracker.samples_ready = 0;
+    LOGI("source_a2dp_configure_sample_rate: %d",sample_rate);
+    bool is_reopen = false;
+    if (is_streams_opened && sample_rate!=current_sample_rate){
+      is_reopen = true;
+    }
 
+    current_sample_rate = sample_rate;
+    
+    // when the sample rate has changed we need to reopen
+    if (is_reopen){
+      openStreams();
+    }
+  }
+  void openStreams() {
+    TRACEI();
     // set encoder parameters
     sbc_encoder.setSubbands(sbc_configuration.subbands);
     sbc_encoder.setBitpool(sbc_configuration.max_bitpool_value);
@@ -358,7 +366,7 @@ protected:
 
     // setup ecoder_stream
     auto cfg = encoder_stream.defaultConfig();
-    cfg.sample_rate = sample_rate;
+    cfg.sample_rate = current_sample_rate;
     cfg.channels = NUM_CHANNELS;
     encoder_stream.begin(cfg);
 
@@ -367,7 +375,6 @@ protected:
     vcfg.copyFrom(cfg);
     vcfg.volume = 0.01f * volume_percentage;
     volume_stream.begin(vcfg);
-    avrcp_volume_changed(volume_percentage);   
 
     // configure input if possible
     if (p_input!=nullptr){
@@ -377,6 +384,7 @@ protected:
     // start queue stream
     media_tracker.queue.clear();
     media_tracker.queue.begin();
+    is_streams_opened = true;
 
   }
 
@@ -707,6 +715,7 @@ protected:
       dump_sbc_configuration(&sbc_configuration);
       // Setup SBC decoder 
       source_a2dp_configure_sample_rate(sbc_configuration.sampling_frequency);
+      openStreams();
       break;
     }
 
@@ -977,187 +986,6 @@ protected:
              packet[2], status);
     }
   }
-
-
-#ifdef HAVE_BTSTACK_STDIN
-  void show_usage(void) {
-    TRACED();
-    bd_addr_t iut_address;
-    gap_local_bd_addr(iut_address);
-    printf("\n--- Bluetooth  A2DP Source/AVRCP arduino %s ---\n",
-           bd_addr_to_str(iut_address));
-    printf("a      - Scan for Bluetooth speaker and connect\n");
-    printf("b      - A2DP Source create connection to addr %s\n",
-           device_addr_string);
-    printf("B      - A2DP Source disconnect\n");
-    printf("c      - AVRCP create connection to addr %s\n", device_addr_string);
-    printf("C      - AVRCP disconnect\n");
-    printf("D      - delete all link keys\n");
-
-    printf("x      - start streaming sine\n");
-    if (hxcmod_initialized) {
-      printf("z      - start streaming '%s'\n", mod_name);
-    }
-    printf("p      - pause streaming\n");
-    printf("w      - reconfigure stream for 44100 Hz\n");
-    printf("e      - reconfigure stream for 48000 Hz\n");
-    printf("t      - volume up\n");
-    printf("T      - volume down\n");
-    printf("v      - volume up (via set absolute volume)\n");
-    printf("V      - volume down (via set absolute volume)\n");
-
-    printf("---\n");
-  }
-
-  void stdin_process(char cmd) {
-    TRACED();
-    uint8_t status = ERROR_CODE_SUCCESS;
-    switch (cmd) {
-    case 'a':
-      a2dp_source_arduino_start_scanning();
-      break;
-    case 'b':
-      status =
-          a2dp_source_establish_stream(device_addr, &media_tracker.a2dp_cid);
-      printf("%c - Create A2DP Source connection to addr %s, cid 0x%02x.\n",
-             cmd, bd_addr_to_str(device_addr), media_tracker.a2dp_cid);
-      break;
-    case 'B':
-      printf("%c - A2DP Source Disconnect from cid 0x%2x\n", cmd,
-             media_tracker.a2dp_cid);
-      status = a2dp_source_disconnect(media_tracker.a2dp_cid);
-      break;
-    case 'c':
-      printf("%c - Create AVRCP connection to addr %s.\n", cmd,
-             bd_addr_to_str(device_addr));
-      status = avrcp_connect(device_addr, &media_tracker.avrcp_cid);
-      break;
-    case 'C':
-      printf("%c - AVRCP disconnect\n", cmd);
-      status = avrcp_disconnect(media_tracker.avrcp_cid);
-      break;
-    case 'D':
-      printf("Deleting all link keys\n");
-      gap_delete_all_link_keys();
-      break;
-    case '\n':
-    case '\r':
-      break;
-
-    case 't':
-      printf(" - volume up\n");
-      status = avrcp_controller_volume_up(media_tracker.avrcp_cid);
-      break;
-    case 'T':
-      printf(" - volume down\n");
-      status = avrcp_controller_volume_down(media_tracker.avrcp_cid);
-      break;
-
-    case 'v':
-      if (media_tracker.volume > 117) {
-        media_tracker.volume = 127;
-      } else {
-        media_tracker.volume += 10;
-      }
-      printf(" - volume up (via set absolute volume) %d%% (%d)\n",
-             media_tracker.volume * 100 / 127, media_tracker.volume);
-      status = avrcp_controller_set_absolute_volume(media_tracker.avrcp_cid,
-                                                    media_tracker.volume);
-      break;
-    case 'V':
-      if (media_tracker.volume < 10) {
-        media_tracker.volume = 0;
-      } else {
-        media_tracker.volume -= 10;
-      }
-      printf(" - volume down (via set absolute volume) %d%% (%d)\n",
-             media_tracker.volume * 100 / 127, media_tracker.volume);
-      status = avrcp_controller_set_absolute_volume(media_tracker.avrcp_cid,
-                                                    media_tracker.volume);
-      break;
-
-    case 'x':
-      if (media_tracker.avrcp_cid) {
-        avrcp_target_set_now_playing_info(
-            media_tracker.avrcp_cid, &tracks[data_source],
-            sizeof(tracks) / sizeof(avrcp_track_t));
-      }
-      printf("%c - Play sine.\n", cmd);
-      data_source = STREAM_SINE;
-      if (!media_tracker.stream_opened)
-        break;
-      status = a2dp_source_start_stream(media_tracker.a2dp_cid,
-                                        media_tracker.local_seid);
-      break;
-    case 'z':
-      if (media_tracker.avrcp_cid) {
-        avrcp_target_set_now_playing_info(
-            media_tracker.avrcp_cid, &tracks[data_source],
-            sizeof(tracks) / sizeof(avrcp_track_t));
-      }
-      printf("%c - Play mod.\n", cmd);
-      data_source = 0;
-      if (!media_tracker.stream_opened)
-        break;
-      status = a2dp_source_start_stream(media_tracker.a2dp_cid,
-                                        media_tracker.local_seid);
-      break;
-
-    case 'p':
-      if (!media_tracker.stream_opened)
-        break;
-      printf("%c - Pause stream.\n", cmd);
-      status = a2dp_source_pause_stream(media_tracker.a2dp_cid,
-                                        media_tracker.local_seid);
-      break;
-
-    case 'w':
-      if (!media_tracker.stream_opened)
-        break;
-      if (play_info.status == AVRCP_PLAYBACK_STATUS_PLAYING) {
-        printf("Stream cannot be reconfigured while playing, please pause "
-               "stream first\n");
-        break;
-      }
-      new_sample_rate = 44100;
-      if (current_sample_rate == new_sample_rate) {
-        printf("%c - Stream already configured for %d Hz.\n", cmd,
-               new_sample_rate);
-      } else {
-        printf("%c - Reconfigure for %d Hz.\n", cmd, new_sample_rate);
-        status = a2dp_source_reconfigure_stream_sampling_frequency(
-            media_tracker.a2dp_cid, new_sample_rate);
-      }
-      break;
-
-    case 'e':
-      if (!media_tracker.stream_opened)
-        break;
-      if (play_info.status == AVRCP_PLAYBACK_STATUS_PLAYING) {
-        printf("Stream cannot be reconfigured while playing, please pause "
-               "stream first\n");
-        break;
-      }
-      new_sample_rate = 48000;
-      if (current_sample_rate == new_sample_rate) {
-        printf("%c - Stream already configured for %d Hz.\n", cmd,
-               new_sample_rate);
-      } else {
-        printf("%c - Reconfigure for %d Hz.\n", cmd, new_sample_rate);
-        status = a2dp_source_reconfigure_stream_sampling_frequency(
-            media_tracker.a2dp_cid, new_sample_rate);
-      }
-      break;
-
-    default:
-      show_usage();
-      return;
-    }
-    if (status != ERROR_CODE_SUCCESS) {
-      printf("Could not perform command \'%c\', status 0x%02x\n", cmd, status);
-    }
-  }
-#endif
 
   void setupTrack() {
     TRACED();

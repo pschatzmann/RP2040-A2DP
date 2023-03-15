@@ -63,12 +63,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef HAVE_BTSTACK_STDIN
-#include "btstack_stdin.h"
-const char *device_addr_string = "5C:F3:70:60:7B:87"; // pts
-bd_addr_t device_addr;
-static void stdin_process(char cmd);
-#endif
 
 namespace a2dp_rp2040 {
 
@@ -100,11 +94,6 @@ public:
     dec_stream.setStream(&volume_stream);
     dec_stream.setDecoder(&sbc_decoder);
 
-#ifdef HAVE_BTSTACK_STDIN
-    // parse human-readable Bluetooth address
-    sscanf_bd_addr(device_addr_string, device_addr);
-    btstack_stdin_setup(stdin_process);
-#endif
 
     // turn on!
     LOGI("Starting BTstack ...\n");
@@ -368,7 +357,7 @@ protected:
     auto vcfg = volume_stream.defaultConfig();
     vcfg.copyFrom(cfg);
     vcfg.allow_boost = true;
-    vcfg.volume = 0.01f * volume_percentage;
+    vcfg.volume = volume_as_float(volume_percentage);
     volume_stream.begin(vcfg);
     avrcp_volume_changed(volume_percentage);
 
@@ -618,7 +607,7 @@ protected:
     case AVRCP_SUBEVENT_NOTIFICATION_VOLUME_CHANGED:
       volume = avrcp_subevent_notification_volume_changed_get_absolute_volume(
           packet);
-      volume_percentage = volume * 100 / 127;
+      volume_percentage = volume_to_percent(volume);
       LOGI("AVRCP Target    : Volume set to %d%% (%d)", volume_percentage,
            volume);
       avrcp_volume_changed(volume);
@@ -760,10 +749,6 @@ protected:
            "cid 0x%02X, local seid %d",
            bd_addr_to_str(address), a2dp_conn->a2dp_cid,
            a2dp_conn->a2dp_local_seid);
-#ifdef HAVE_BTSTACK_STDIN
-      // use address for outgoing connections
-      memcpy(device_addr, address, 6);
-#endif
       break;
 
 #ifdef ENABLE_AVDTP_ACCEPTOR_EXPLICIT_START_STREAM_CONFIRMATION
@@ -810,266 +795,6 @@ protected:
     }
   }
 
-#ifdef HAVE_BTSTACK_STDIN
-  void show_usage(void) {
-    TRACED();
-    bd_addr_t iut_address;
-    gap_local_bd_addr(iut_address);
-    printf("\n--- Bluetooth AVDTP Sink/AVRCP Connection Test Console %s ---\n",
-           bd_addr_to_str(iut_address));
-    printf("b      - AVDTP Sink create  connection to addr %s\n",
-           bd_addr_to_str(device_addr));
-    printf("B      - AVDTP Sink disconnect\n");
-    printf("c      - AVRCP create connection to addr %s\n",
-           bd_addr_to_str(device_addr));
-    printf("C      - AVRCP disconnect\n");
-
-    printf("w - delay report\n");
-
-    printf("\n--- Bluetooth AVRCP Commands %s ---\n",
-           bd_addr_to_str(iut_address));
-    printf("O - get play status\n");
-    printf("j - get now playing info\n");
-    printf("k - play\n");
-    printf("K - stop\n");
-    printf("L - pause\n");
-    printf("u - start fast forward\n");
-    printf("U - stop  fast forward\n");
-    printf("n - start rewind\n");
-    printf("N - stop rewind\n");
-    printf("i - forward\n");
-    printf("I - backward\n");
-    printf("M - mute\n");
-    printf("r - skip\n");
-    printf("q - query repeat and shuffle mode\n");
-    printf("v - repeat single track\n");
-    printf("x - repeat all tracks\n");
-    printf("X - disable repeat mode\n");
-    printf("z - shuffle all tracks\n");
-    printf("Z - disable shuffle mode\n");
-
-    printf("a/A - register/deregister TRACK_CHANGED\n");
-    printf("R/P - register/deregister PLAYBACK_POS_CHANGED\n");
-
-    printf("s/S - send/release long button press REWIND\n");
-
-    printf("\n--- Volume and Battery Control ---\n");
-    printf("t - volume up   for 10 percent\n");
-    printf("T - volume down for 10 percent\n");
-    printf("V - toggle Battery status from AVRCP_BATTERY_STATUS_NORMAL to "
-           "AVRCP_BATTERY_STATUS_FULL_CHARGE\n");
-    printf("---\n");
-  }
-#endif
-
-#ifdef HAVE_BTSTACK_STDIN
-  void stdin_process(char cmd) {
-    TRACED();
-    uint8_t status = ERROR_CODE_SUCCESS;
-    uint8_t volume;
-    avrcp_battery_status_t old_battery_status;
-
-    a2dp_sink_arduino_stream_endpoint_t *stream_endpoint =
-        &a2dp_sink_arduino_stream_endpoint;
-    a2dp_sink_arduino_a2dp_connection_t *a2dp_connection =
-        &a2dp_sink_arduino_a2dp_connection;
-    a2dp_sink_arduino_avrcp_connection_t *avrcp_connection =
-        &a2dp_sink_arduino_avrcp_connection;
-
-    switch (cmd) {
-    case 'b':
-      status = a2dp_sink_establish_stream(device_addr,
-                                          stream_endpoint->a2dp_local_seid,
-                                          &a2dp_connection->a2dp_cid);
-      printf(" - Create AVDTP connection to addr %s, and local seid %d, "
-             "expected "
-             "cid 0x%02x.\n",
-             bd_addr_to_str(device_addr), a2dp_connection->a2dp_local_seid,
-             a2dp_connection->a2dp_cid);
-      break;
-    case 'B':
-      printf(" - AVDTP disconnect from addr %s.\n",
-             bd_addr_to_str(device_addr));
-      a2dp_sink_disconnect(a2dp_connection->a2dp_cid);
-      break;
-    case 'c':
-      printf(" - Create AVRCP connection to addr %s.\n",
-             bd_addr_to_str(device_addr));
-      status = avrcp_connect(device_addr, &avrcp_connection->avrcp_cid);
-      break;
-    case 'C':
-      printf(" - AVRCP disconnect from addr %s.\n",
-             bd_addr_to_str(device_addr));
-      status = avrcp_disconnect(avrcp_connection->avrcp_cid);
-      break;
-
-    case '\n':
-    case '\r':
-      break;
-    case 'w':
-      printf("Send delay report\n");
-      avdtp_sink_delay_report(a2dp_connection->a2dp_cid,
-                              a2dp_connection->a2dp_local_seid, 100);
-      break;
-    // Volume Control
-    case 't':
-      volume_percentage =
-          volume_percentage <= 90 ? volume_percentage + 10 : 100;
-      volume = volume_percentage * 127 / 100;
-      printf(" - volume up   for 10 percent, %d%% (%d) \n", volume_percentage,
-             volume);
-      status = avrcp_target_volume_changed(avrcp_connection->avrcp_cid, volume);
-      avrcp_volume_changed(volume);
-      break;
-    case 'T':
-      volume_percentage = volume_percentage >= 10 ? volume_percentage - 10 : 0;
-      volume = volume_percentage * 127 / 100;
-      printf(" - volume down for 10 percent, %d%% (%d) \n", volume_percentage,
-             volume);
-      status = avrcp_target_volume_changed(avrcp_connection->avrcp_cid, volume);
-      avrcp_volume_changed(volume);
-      break;
-    case 'V':
-      old_battery_status = battery_status;
-
-      if (battery_status < AVRCP_BATTERY_STATUS_FULL_CHARGE) {
-        battery_status = (avrcp_battery_status_t)((uint8_t)battery_status + 1);
-      } else {
-        battery_status = AVRCP_BATTERY_STATUS_NORMAL;
-      }
-      printf(" - toggle battery value, old %d, new %d\n", old_battery_status,
-             battery_status);
-      status = avrcp_target_battery_status_changed(avrcp_connection->avrcp_cid,
-                                                   battery_status);
-      break;
-    case 'O':
-      printf(" - get play status\n");
-      status = avrcp_controller_get_play_status(avrcp_connection->avrcp_cid);
-      break;
-    case 'j':
-      printf(" - get now playing info\n");
-      status =
-          avrcp_controller_get_now_playing_info(avrcp_connection->avrcp_cid);
-      break;
-    case 'k':
-      printf(" - play\n");
-      status = avrcp_controller_play(avrcp_connection->avrcp_cid);
-      break;
-    case 'K':
-      printf(" - stop\n");
-      status = avrcp_controller_stop(avrcp_connection->avrcp_cid);
-      break;
-    case 'L':
-      printf(" - pause\n");
-      status = avrcp_controller_pause(avrcp_connection->avrcp_cid);
-      break;
-    case 'u':
-      printf(" - start fast forward\n");
-      status = avrcp_controller_press_and_hold_fast_forward(
-          avrcp_connection->avrcp_cid);
-      break;
-    case 'U':
-      printf(" - stop fast forward\n");
-      status = avrcp_controller_release_press_and_hold_cmd(
-          avrcp_connection->avrcp_cid);
-      break;
-    case 'n':
-      printf(" - start rewind\n");
-      status =
-          avrcp_controller_press_and_hold_rewind(avrcp_connection->avrcp_cid);
-      break;
-    case 'N':
-      printf(" - stop rewind\n");
-      status = avrcp_controller_release_press_and_hold_cmd(
-          avrcp_connection->avrcp_cid);
-      break;
-    case 'i':
-      printf(" - forward\n");
-      status = avrcp_controller_forward(avrcp_connection->avrcp_cid);
-      break;
-    case 'I':
-      printf(" - backward\n");
-      status = avrcp_controller_backward(avrcp_connection->avrcp_cid);
-      break;
-    case 'M':
-      printf(" - mute\n");
-      status = avrcp_controller_mute(avrcp_connection->avrcp_cid);
-      break;
-    case 'r':
-      printf(" - skip\n");
-      status = avrcp_controller_skip(avrcp_connection->avrcp_cid);
-      break;
-    case 'q':
-      printf(" - query repeat and shuffle mode\n");
-      status = avrcp_controller_query_shuffle_and_repeat_modes(
-          avrcp_connection->avrcp_cid);
-      break;
-    case 'v':
-      printf(" - repeat single track\n");
-      status = avrcp_controller_set_repeat_mode(avrcp_connection->avrcp_cid,
-                                                AVRCP_REPEAT_MODE_SINGLE_TRACK);
-      break;
-    case 'x':
-      printf(" - repeat all tracks\n");
-      status = avrcp_controller_set_repeat_mode(avrcp_connection->avrcp_cid,
-                                                AVRCP_REPEAT_MODE_ALL_TRACKS);
-      break;
-    case 'X':
-      printf(" - disable repeat mode\n");
-      status = avrcp_controller_set_repeat_mode(avrcp_connection->avrcp_cid,
-                                                AVRCP_REPEAT_MODE_OFF);
-      break;
-    case 'z':
-      printf(" - shuffle all tracks\n");
-      status = avrcp_controller_set_shuffle_mode(avrcp_connection->avrcp_cid,
-                                                 AVRCP_SHUFFLE_MODE_ALL_TRACKS);
-      break;
-    case 'Z':
-      printf(" - disable shuffle mode\n");
-      status = avrcp_controller_set_shuffle_mode(avrcp_connection->avrcp_cid,
-                                                 AVRCP_SHUFFLE_MODE_OFF);
-      break;
-    case 'a':
-      printf("AVRCP: enable notification TRACK_CHANGED\n");
-      avrcp_controller_enable_notification(
-          avrcp_connection->avrcp_cid, AVRCP_NOTIFICATION_EVENT_TRACK_CHANGED);
-      break;
-    case 'A':
-      printf("AVRCP: disable notification TRACK_CHANGED\n");
-      avrcp_controller_disable_notification(
-          avrcp_connection->avrcp_cid, AVRCP_NOTIFICATION_EVENT_TRACK_CHANGED);
-      break;
-    case 'R':
-      printf("AVRCP: enable notification PLAYBACK_POS_CHANGED\n");
-      avrcp_controller_enable_notification(
-          avrcp_connection->avrcp_cid,
-          AVRCP_NOTIFICATION_EVENT_PLAYBACK_POS_CHANGED);
-      break;
-    case 'P':
-      printf("AVRCP: disable notification PLAYBACK_POS_CHANGED\n");
-      avrcp_controller_disable_notification(
-          avrcp_connection->avrcp_cid,
-          AVRCP_NOTIFICATION_EVENT_PLAYBACK_POS_CHANGED);
-      break;
-    case 's':
-      printf("AVRCP: send long button press REWIND\n");
-      avrcp_controller_start_press_and_hold_cmd(avrcp_connection->avrcp_cid,
-                                                AVRCP_OPERATION_ID_REWIND);
-      break;
-    case 'S':
-      printf("AVRCP: release long button press REWIND\n");
-      avrcp_controller_release_press_and_hold_cmd(avrcp_connection->avrcp_cid);
-      break;
-    default:
-      show_usage();
-      return;
-    }
-    if (status != ERROR_CODE_SUCCESS) {
-      printf("Could not perform command, status 0x%02x\n", status);
-    }
-  }
-#endif
-
 } A2DPSink;
 
 // -- Implement Callback functions which forward calls to A2DPSink
@@ -1107,8 +832,5 @@ void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
                                                   size);
 }
 
-#ifdef HAVE_BTSTACK_STDIN
-void stdin_process(char cmd) { A2DPSink.local_stdin_process(cmd); }
-#endif
 
 } // namespace a2dp_rp2040

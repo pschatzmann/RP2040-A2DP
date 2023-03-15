@@ -18,7 +18,10 @@
 #define BTSTACK_FILE__ "a2dp_rp2040"
 #define AVRCP_BROWSING_ENABLED
 #define NUM_CHANNELS 2
-//#define HAVE_BTSTACK_STDIN
+
+#define ENABLE_LOG_INFO
+#define ENABLE_LOG_ERROR
+
 
 // Sink
 #define MAX_AMPLITUDE_RECEIVED 2500
