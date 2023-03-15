@@ -44,8 +44,7 @@
  * receive an audio data stream from a remote A2DP Source device. In addition,
  * the AVRCP Controller is used to get information on currently played media,
  * such are title, artist and album, as well as to control the playback,
- * i.e. to play, stop, repeat, etc. If HAVE_BTSTACK_STDIN is set, press SPACE on
- * the console to show the available AVDTP and AVRCP commands.
+ * i.e. to play, stop, repeat, etc. 
  *
  * @text To test with a remote device, e.g. a mobile phone,
  * pair from the remote device with the arduino, then start playing music on the
@@ -216,9 +215,6 @@ protected:
    * commands.
    * - sink_avrcp_target_packet_handler - receives AVRCP commands, and
    * registered notifications.
-   * - stdin_process - used to trigger AVRCP commands to the A2DP Source
-   * device, such are get now playing info, start, stop, volume control.
-   * Requires HAVE_BTSTACK_STDIN.
    *
    * @text To announce A2DP Sink and AVRCP services, you need to create
    * corresponding SDP records and register them with the SDP service.

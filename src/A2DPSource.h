@@ -45,8 +45,7 @@
  * to a remote A2DP Sink device and how to switch between two audio data
  * sources. In addition, the AVRCP Target is used to answer queries on currently
  * played media, as well as to handle remote playback control, i.e. play, stop,
- * repeat, etc. If HAVE_BTSTACK_STDIN is set, press SPACE on the console to show
- * the available AVDTP and AVRCP commands.
+ * repeat, etc. 
  *
  * @text To test with a remote device, e.g. a Bluetooth speaker,
  * set the device_addr_string to the Bluetooth address of your
@@ -142,10 +141,6 @@ protected:
     QueueStream<uint8_t> queue{rb};
     bool is_streaming = false;
     bool sbc_is_busy = false;
-
-#ifndef HAVE_BTSTACK_STDIN
-    uint8_t volume;
-#endif
   } media_tracker;
 
 
@@ -219,10 +214,6 @@ protected:
    * commands.
    * - source_avrcp_target_packet_handler - receives AVRCP commands, and
    * registered notifications.
-   * - stdin_process - used to trigger AVRCP commands to the A2DP Source device,
-   * such are get now playing info, start, stop, volume control. Requires
-   * HAVE_BTSTACK_STDIN.
-   *
    * @text To announce A2DP Source and AVRCP services, you need to create
    * corresponding SDP records and register them with the SDP service.
    */
@@ -545,13 +536,6 @@ protected:
     const uint32_t bluetooth_speaker_cod = 0x200000 | 0x040000 | 0x000400;
 
     switch (hci_event_packet_get_type(packet)) {
-#ifndef HAVE_BTSTACK_STDIN
-    case BTSTACK_EVENT_STATE:
-      if (btstack_event_state_get_state(packet) != HCI_STATE_WORKING)
-        return;
-      a2dp_source_arduino_start_scanning();
-      break;
-#endif
     case HCI_EVENT_PIN_CODE_REQUEST:
       LOGI("Pin code request - using '0000'");
       hci_event_pin_code_request_get_bd_addr(packet, address);
@@ -633,9 +617,6 @@ protected:
         break;
       }
       media_tracker.a2dp_cid = cid;
-#ifndef HAVE_BTSTACK_STDIN
-      media_tracker.volume = 32;
-#endif
       LOGI("A2DP Source: Connected to address %s, a2dp cid 0x%02x, local "
              "seid 0x%02x.",
              bd_addr_to_str(address), media_tracker.a2dp_cid,
