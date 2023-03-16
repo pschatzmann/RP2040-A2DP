@@ -536,6 +536,11 @@ protected:
     const uint32_t bluetooth_speaker_cod = 0x200000 | 0x040000 | 0x000400;
 
     switch (hci_event_packet_get_type(packet)) {
+    case BTSTACK_EVENT_STATE:
+      if (btstack_event_state_get_state(packet) != HCI_STATE_WORKING)
+        return;
+      a2dp_source_arduino_start_scanning();
+      break;
     case HCI_EVENT_PIN_CODE_REQUEST:
       LOGI("Pin code request - using '0000'");
       hci_event_pin_code_request_get_bd_addr(packet, address);
