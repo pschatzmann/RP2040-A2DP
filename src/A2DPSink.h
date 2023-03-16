@@ -44,7 +44,7 @@
  * receive an audio data stream from a remote A2DP Source device. In addition,
  * the AVRCP Controller is used to get information on currently played media,
  * such are title, artist and album, as well as to control the playback,
- * i.e. to play, stop, repeat, etc. 
+ * i.e. to play, stop, repeat, etc.
  *
  * @text To test with a remote device, e.g. a mobile phone,
  * pair from the remote device with the arduino, then start playing music on the
@@ -57,11 +57,11 @@
  *
  */
 // *****************************************************************************
-#include "A2DPCommon.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "A2DPCommon.h"
 
 namespace btstack_a2dp {
 
@@ -71,8 +71,7 @@ namespace btstack_a2dp {
  */
 
 class A2DPSinkClass : public A2DPCommon {
-
-public:
+ public:
   /// Starts A2DP Sink with the output to I2S
   bool begin(const char *name) {
     static I2SStream i2s;
@@ -91,8 +90,7 @@ public:
     int rc = a2dp_and_avrcp_setup();
     volume_stream.setTarget(out);
     dec_stream.setStream(&volume_stream);
-    dec_stream.setDecoder(&sbc_decoder);
-
+    dec_stream.setDecoder(&(get_decoder().decoder()));
 
     // turn on!
     LOGI("Starting BTstack ...\n");
@@ -109,9 +107,12 @@ public:
     dec_stream.end();
   }
 
+  /// Sets the decoder
+  void setDecoder(A2DPDecoder &dec) { p_decoder = &dec; }
 
+  void resetDecoder() { p_decoder = &decoder_sbc; }
 
-protected:
+ protected:
   friend void sink_hci_packet_handler(uint8_t packet_type, uint16_t channel,
                                       uint8_t *packet, uint16_t size);
   friend void sink_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
@@ -128,41 +129,6 @@ protected:
                                                uint16_t channel,
                                                uint8_t *packet, uint16_t size);
 
-  const char *a2dp_name = "rp2040";
-  AdapterAudioStreamToAudioPrint out_print;
-  EncodedAudioPrint dec_stream;
-  SBCDecoder sbc_decoder;
-
-  btstack_packet_callback_registration_t hci_event_callback_registration;
-
-  uint8_t sdp_avdtp_sink_service_buffer[150];
-  uint8_t sdp_avrcp_target_service_buffer[150];
-  uint8_t sdp_avrcp_controller_service_buffer[200];
-  uint8_t device_id_sdp_service_buffer[100];
-
-  // we support all configurations with bitpool 2-53
-  uint8_t media_sbc_codec_capabilities[4] = {
-      0xFF, //(AVDTP_SBC_44100 << 4) | AVDTP_SBC_STEREO - 0xFF
-      0xFF, //(AVDTP_SBC_BLOCK_LENGTH_16 << 4) | (AVDTP_SBC_SUBBANDS_8 << 2) |
-            // AVDTP_SBC_ALLOCATION_METHOD_LOUDNESS,
-      2, 53};
-
-  // ring buffer for SBC Frames
-  RingBuffer<uint8_t> ring_buffer{(OPTIMAL_FRAMES_MAX + ADDITIONAL_FRAMES) *
-                                  MAX_SBC_FRAME_SIZE};
-  unsigned int sbc_frame_size;
-
-  int media_initialized = 0;
-  int audio_stream_started;
-
-  // temp storage of lower-layer request for audio samples
-  int16_t *request_buffer;
-  int request_frames;
-
-  // sink state
-  avrcp_battery_status_t battery_status = AVRCP_BATTERY_STATUS_WARNING;
-
-
   enum stream_state_t {
     STREAM_STATE_CLOSED,
     STREAM_STATE_OPEN,
@@ -172,7 +138,7 @@ protected:
 
   struct a2dp_sink_arduino_stream_endpoint_t {
     uint8_t a2dp_local_seid;
-    uint8_t media_sbc_codec_configuration[4];
+    // uint8_t media_sbc_codec_configuration[4]; ***
   } a2dp_sink_arduino_stream_endpoint;
 
   struct a2dp_sink_arduino_a2dp_connection_t {
@@ -180,7 +146,7 @@ protected:
     uint16_t a2dp_cid;
     uint8_t a2dp_local_seid;
     stream_state_t stream_state;
-    media_codec_configuration_sbc_t sbc_configuration;
+    // media_codec_configuration_sbc_t sbc_configuration; ***
   } a2dp_sink_arduino_a2dp_connection;
 
   struct a2dp_sink_arduino_avrcp_connection_t {
@@ -189,18 +155,39 @@ protected:
     bool playing;
   } a2dp_sink_arduino_avrcp_connection;
 
-  int16_t get_max_input_amplitude() override { return MAX_AMPLITUDE_RECEIVED;}
+  // local state
+  A2DPDecoderSBC decoder_sbc;
+  A2DPDecoder *p_decoder = &decoder_sbc;
+  const char *a2dp_name = "rp2040";
+  AdapterAudioStreamToAudioPrint out_print;
+  EncodedAudioPrint dec_stream;
+  RingBuffer<uint8_t> ring_buffer{(OPTIMAL_FRAMES_MAX + ADDITIONAL_FRAMES) *
+                                  MAX_SBC_FRAME_SIZE};
+  btstack_packet_callback_registration_t hci_event_callback_registration;
+  uint8_t sdp_avdtp_sink_service_buffer[150];
+  uint8_t sdp_avrcp_target_service_buffer[150];
+  uint8_t sdp_avrcp_controller_service_buffer[200];
+  uint8_t device_id_sdp_service_buffer[100];
+  unsigned int sbc_frame_size;
+  int media_initialized = 0;
+  int audio_stream_started;
+  int request_frames;
+  avrcp_battery_status_t battery_status = AVRCP_BATTERY_STATUS_WARNING;
+  int16_t *request_buffer;
+
+  // local methods
+  int16_t get_max_input_amplitude() override { return MAX_AMPLITUDE_RECEIVED; }
 
   int get_avrcp_cid() { return a2dp_sink_arduino_avrcp_connection.avrcp_cid; }
-  
+
+  A2DPDecoder &get_decoder() { return *p_decoder; }
+
   void set_playing(bool playing) override {
     is_playing = playing;
     a2dp_sink_arduino_avrcp_connection.playing = playing;
   }
 
-
-  /* @section Main Application Setup
-   *
+  /**
    * @text The Listing MainConfiguration shows how to set up AD2P Sink and
    * AVRCP services. Besides calling init() method for each service, you'll
    * also need to register several packet handlers:
@@ -231,7 +218,7 @@ protected:
       // Initialize LE Security Manager. Needed for cross-transport key
       // derivation
       sm_init();
-    }  
+    }
 
     // Initialize AVDTP Sink
     a2dp_sink_init();
@@ -241,12 +228,11 @@ protected:
     // Create stream endpoint
     a2dp_sink_arduino_stream_endpoint_t *stream_endpoint =
         &a2dp_sink_arduino_stream_endpoint;
+    A2DPDecoder &dec = get_decoder();
     avdtp_stream_endpoint_t *local_stream_endpoint =
         a2dp_sink_create_stream_endpoint(
-            AVDTP_AUDIO, AVDTP_CODEC_SBC, media_sbc_codec_capabilities,
-            sizeof(media_sbc_codec_capabilities),
-            stream_endpoint->media_sbc_codec_configuration,
-            sizeof(stream_endpoint->media_sbc_codec_configuration));
+            AVDTP_AUDIO, dec.codecType(), dec.codecCapabilities(),
+            dec.codecCapabilitiesSize(), dec.config(), dec.configSize());
     if (!local_stream_endpoint) {
       printf("A2DP Sink: not enough memory to create local stream endpoint\n");
       return 1;
@@ -338,16 +324,18 @@ protected:
   }
   /* LISTING_END */
 
-  int media_processing_init(media_codec_configuration_sbc_t *configuration) {
+  int media_processing_init() {
     TRACED();
-    if (media_initialized)
-      return 0;
+    if (media_initialized) return 0;
+
+    auto &dec = get_decoder();
+    dec.begin();
+    auto cfg = dec.audioInfo();
 
     // setup decoder output
-    auto cfg = dec_stream.defaultConfig();
-    cfg.channels = configuration->num_channels;
-    cfg.sample_rate = configuration->sampling_frequency;
-    dec_stream.begin(cfg);
+    auto cfgd = dec_stream.defaultConfig();
+    cfgd.copyFrom(cfg);
+    dec_stream.begin(cfgd);
 
     // setup volume output
     auto vcfg = volume_stream.defaultConfig();
@@ -364,8 +352,7 @@ protected:
 
   void media_processing_start(void) {
     TRACED();
-    if (!media_initialized)
-      return;
+    if (!media_initialized) return;
 
     dec_stream.begin();
     audio_stream_started = 1;
@@ -373,16 +360,14 @@ protected:
 
   void media_processing_pause(void) {
     TRACED();
-    if (!media_initialized)
-      return;
+    if (!media_initialized) return;
     // stop audio playback
     audio_stream_started = 0;
   }
 
   void media_processing_close(void) {
     TRACED();
-    if (!media_initialized)
-      return;
+    if (!media_initialized) return;
     media_initialized = 0;
     audio_stream_started = 0;
     sbc_frame_size = 0;
@@ -390,9 +375,8 @@ protected:
     dec_stream.end();
   }
 
-  /* @section Handle Media Data Packet
-   *
-   * @text Here the audio data, are received through the
+  /** 
+   * @brief Here the audio data, are received through the
    * sink_handle_l2cap_media_data_packet callback. Currently, only the SBC media
    * codec is supported. Hence, the media data consists of the media packet
    * header and the SBC packet. The SBC frame will be stored in a ring buffer
@@ -402,11 +386,6 @@ protected:
    * playback.
    */
 
-  // int read_media_data_header(uint8_t *packet, int size, int *offset,
-  //                            avdtp_media_packet_header_t *media_header);
-  // int read_sbc_header(uint8_t *packet, int size, int *offset,
-  //                     avdtp_sbc_codec_header_t *sbc_header);
-
   void local_sink_handle_l2cap_media_data_packet(uint8_t seid, uint8_t *packet,
                                                  uint16_t size) {
     UNUSED(seid);
@@ -414,12 +393,10 @@ protected:
     int pos = 0;
 
     avdtp_media_packet_header_t media_header;
-    if (!read_media_data_header(packet, size, &pos, &media_header))
-      return;
+    if (!read_media_data_header(packet, size, &pos, &media_header)) return;
 
     avdtp_sbc_codec_header_t sbc_header;
-    if (!read_sbc_header(packet, size, &pos, &sbc_header))
-      return;
+    if (!read_sbc_header(packet, size, &pos, &sbc_header)) return;
 
     // store sbc frame size for buffer management
     sbc_frame_size = (size - pos) / sbc_header.num_frames;
@@ -438,8 +415,7 @@ protected:
   }
 
   void play_audio() {
-    if (!audio_stream_started)
-      return;
+    if (!audio_stream_started) return;
     // copy ringbuffer to decoder stream
     uint8_t sbc_frame[MAX_SBC_FRAME_SIZE];
     while (ring_buffer.available() >= sbc_frame_size) {
@@ -452,7 +428,7 @@ protected:
   int read_sbc_header(uint8_t *packet, int size, int *offset,
                       avdtp_sbc_codec_header_t *sbc_header) {
     TRACED();
-    int sbc_header_len = 12; // without crc
+    int sbc_header_len = 12;  // without crc
     int pos = *offset;
 
     if (size - pos < sbc_header_len) {
@@ -473,14 +449,15 @@ protected:
   int read_media_data_header(uint8_t *packet, int size, int *offset,
                              avdtp_media_packet_header_t *media_header) {
     TRACED();
-    int media_header_len = 12; // without crc
+    int media_header_len = 12;  // without crc
     int pos = *offset;
 
     if (size - pos < media_header_len) {
-      LOGW("Not enough data to read media packet header, expected %d, "
-           "received "
-           "%d",
-           media_header_len, size - pos);
+      LOGW(
+          "Not enough data to read media packet header, expected %d, "
+          "received "
+          "%d",
+          media_header_len, size - pos);
       return 0;
     }
 
@@ -506,19 +483,6 @@ protected:
     return 1;
   }
 
-  void dump_sbc_configuration(media_codec_configuration_sbc_t *configuration) {
-    TRACED();
-    LOGI("    - num_channels: %d", configuration->num_channels);
-    LOGI("    - sampling_frequency: %d", configuration->sampling_frequency);
-    LOGI("    - channel_mode: %d", configuration->channel_mode);
-    LOGI("    - block_length: %d", configuration->block_length);
-    LOGI("    - subbands: %d", configuration->subbands);
-    LOGI("    - allocation_method: %d", configuration->allocation_method);
-    LOGI("    - bitpool_value [%d, %d]", configuration->min_bitpool_value,
-         configuration->max_bitpool_value);
-    LOGI("\n");
-  }
-
   void local_sink_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
                                        uint8_t *packet, uint16_t size) {
     TRACED();
@@ -531,57 +495,55 @@ protected:
     a2dp_sink_arduino_avrcp_connection_t *connection =
         &a2dp_sink_arduino_avrcp_connection;
 
-    if (packet_type != HCI_EVENT_PACKET)
-      return;
-    if (hci_event_packet_get_type(packet) != HCI_EVENT_AVRCP_META)
-      return;
+    if (packet_type != HCI_EVENT_PACKET) return;
+    if (hci_event_packet_get_type(packet) != HCI_EVENT_AVRCP_META) return;
 
     switch (packet[2]) {
-    case AVRCP_SUBEVENT_CONNECTION_ESTABLISHED: {
-      local_cid = avrcp_subevent_connection_established_get_avrcp_cid(packet);
-      status = avrcp_subevent_connection_established_get_status(packet);
-      if (status != ERROR_CODE_SUCCESS) {
-        LOGE("AVRCP: Connection failed: status 0x%02x", status);
-        connection->avrcp_cid = 0;
+      case AVRCP_SUBEVENT_CONNECTION_ESTABLISHED: {
+        local_cid = avrcp_subevent_connection_established_get_avrcp_cid(packet);
+        status = avrcp_subevent_connection_established_get_status(packet);
+        if (status != ERROR_CODE_SUCCESS) {
+          LOGE("AVRCP: Connection failed: status 0x%02x", status);
+          connection->avrcp_cid = 0;
+          return;
+        }
+
+        connection->avrcp_cid = local_cid;
+        avrcp_subevent_connection_established_get_bd_addr(packet, address);
+        LOGI("AVRCP: Connected to %s, cid 0x%02x\n", bd_addr_to_str(address),
+             connection->avrcp_cid);
+
+        avrcp_target_support_event(connection->avrcp_cid,
+                                   AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
+        avrcp_target_support_event(
+            connection->avrcp_cid,
+            AVRCP_NOTIFICATION_EVENT_BATT_STATUS_CHANGED);
+        avrcp_target_battery_status_changed(connection->avrcp_cid,
+                                            battery_status);
+
+        // automatically enable notifications
+        avrcp_controller_enable_notification(
+            connection->avrcp_cid,
+            AVRCP_NOTIFICATION_EVENT_PLAYBACK_STATUS_CHANGED);
+        avrcp_controller_enable_notification(
+            connection->avrcp_cid, AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
+        avrcp_controller_enable_notification(
+            connection->avrcp_cid,
+            AVRCP_NOTIFICATION_EVENT_NOW_PLAYING_CONTENT_CHANGED);
+        avrcp_controller_enable_notification(
+            connection->avrcp_cid, AVRCP_NOTIFICATION_EVENT_TRACK_CHANGED);
         return;
       }
 
-      connection->avrcp_cid = local_cid;
-      avrcp_subevent_connection_established_get_bd_addr(packet, address);
-      LOGI("AVRCP: Connected to %s, cid 0x%02x\n", bd_addr_to_str(address),
-           connection->avrcp_cid);
-
-      avrcp_target_support_event(connection->avrcp_cid,
-                                 AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
-      avrcp_target_support_event(connection->avrcp_cid,
-                                 AVRCP_NOTIFICATION_EVENT_BATT_STATUS_CHANGED);
-      avrcp_target_battery_status_changed(connection->avrcp_cid,
-                                          battery_status);
-
-      // automatically enable notifications
-      avrcp_controller_enable_notification(
-          connection->avrcp_cid,
-          AVRCP_NOTIFICATION_EVENT_PLAYBACK_STATUS_CHANGED);
-      avrcp_controller_enable_notification(
-          connection->avrcp_cid, AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
-      avrcp_controller_enable_notification(
-          connection->avrcp_cid,
-          AVRCP_NOTIFICATION_EVENT_NOW_PLAYING_CONTENT_CHANGED);
-      avrcp_controller_enable_notification(
-          connection->avrcp_cid, AVRCP_NOTIFICATION_EVENT_TRACK_CHANGED);
-      return;
-    }
-
-    case AVRCP_SUBEVENT_CONNECTION_RELEASED:
-      LOGI("AVRCP: Channel released: cid 0x%02x",
-           avrcp_subevent_connection_released_get_avrcp_cid(packet));
-      connection->avrcp_cid = 0;
-      return;
-    default:
-      break;
+      case AVRCP_SUBEVENT_CONNECTION_RELEASED:
+        LOGI("AVRCP: Channel released: cid 0x%02x",
+             avrcp_subevent_connection_released_get_avrcp_cid(packet));
+        connection->avrcp_cid = 0;
+        return;
+      default:
+        break;
     }
   }
-
 
   void local_sink_avrcp_target_packet_handler(uint8_t packet_type,
                                               uint16_t channel, uint8_t *packet,
@@ -590,46 +552,44 @@ protected:
     UNUSED(channel);
     UNUSED(size);
 
-    if (packet_type != HCI_EVENT_PACKET)
-      return;
-    if (hci_event_packet_get_type(packet) != HCI_EVENT_AVRCP_META)
-      return;
+    if (packet_type != HCI_EVENT_PACKET) return;
+    if (hci_event_packet_get_type(packet) != HCI_EVENT_AVRCP_META) return;
 
     uint8_t volume;
     char const *button_state;
     avrcp_operation_id_t operation_id;
 
     switch (packet[2]) {
-    case AVRCP_SUBEVENT_NOTIFICATION_VOLUME_CHANGED:
-      volume = avrcp_subevent_notification_volume_changed_get_absolute_volume(
-          packet);
-      volume_percentage = volume_to_percent(volume);
-      LOGI("AVRCP Target    : Volume set to %d%% (%d)", volume_percentage,
-           volume);
-      avrcp_volume_changed(volume);
-      break;
-
-    case AVRCP_SUBEVENT_OPERATION:
-      operation_id =
-          (avrcp_operation_id_t)avrcp_subevent_operation_get_operation_id(
-              (const uint8_t *)packet);
-      button_state = avrcp_subevent_operation_get_button_pressed(packet) > 0
-                         ? "PRESS"
-                         : "RELEASE";
-      switch (operation_id) {
-      case AVRCP_OPERATION_ID_VOLUME_UP:
-        LOGI("AVRCP Target    : VOLUME UP (%s)", button_state);
+      case AVRCP_SUBEVENT_NOTIFICATION_VOLUME_CHANGED:
+        volume = avrcp_subevent_notification_volume_changed_get_absolute_volume(
+            packet);
+        volume_percentage = volume_to_percent(volume);
+        LOGI("AVRCP Target    : Volume set to %d%% (%d)", volume_percentage,
+             volume);
+        avrcp_volume_changed(volume);
         break;
-      case AVRCP_OPERATION_ID_VOLUME_DOWN:
-        LOGI("AVRCP Target    : VOLUME DOWN (%s)", button_state);
+
+      case AVRCP_SUBEVENT_OPERATION:
+        operation_id =
+            (avrcp_operation_id_t)avrcp_subevent_operation_get_operation_id(
+                (const uint8_t *)packet);
+        button_state = avrcp_subevent_operation_get_button_pressed(packet) > 0
+                           ? "PRESS"
+                           : "RELEASE";
+        switch (operation_id) {
+          case AVRCP_OPERATION_ID_VOLUME_UP:
+            LOGI("AVRCP Target    : VOLUME UP (%s)", button_state);
+            break;
+          case AVRCP_OPERATION_ID_VOLUME_DOWN:
+            LOGI("AVRCP Target    : VOLUME DOWN (%s)", button_state);
+            break;
+          default:
+            return;
+        }
         break;
       default:
-        return;
-      }
-      break;
-    default:
-      LOGI("AVRCP Target    : Event 0x%02x is not parsed", packet[2]);
-      break;
+        LOGI("AVRCP Target    : Event 0x%02x is not parsed", packet[2]);
+        break;
     }
   }
 
@@ -638,8 +598,7 @@ protected:
     TRACED();
     UNUSED(channel);
     UNUSED(size);
-    if (packet_type != HCI_EVENT_PACKET)
-      return;
+    if (packet_type != HCI_EVENT_PACKET) return;
     if (hci_event_packet_get_type(packet) == HCI_EVENT_PIN_CODE_REQUEST) {
       bd_addr_t address;
       LOGI("Pin code request - using '0000'");
@@ -655,139 +614,87 @@ protected:
     UNUSED(size);
     bd_addr_t address;
     uint8_t status;
+    auto &dec = get_decoder();
 
-    uint8_t allocation_method;
-
-    if (packet_type != HCI_EVENT_PACKET)
-      return;
-    if (hci_event_packet_get_type(packet) != HCI_EVENT_A2DP_META)
-      return;
+    if (packet_type != HCI_EVENT_PACKET) return;
+    if (hci_event_packet_get_type(packet) != HCI_EVENT_A2DP_META) return;
 
     a2dp_sink_arduino_a2dp_connection_t *a2dp_conn =
         &a2dp_sink_arduino_a2dp_connection;
 
     switch (packet[2]) {
-    case A2DP_SUBEVENT_SIGNALING_MEDIA_CODEC_OTHER_CONFIGURATION:
-      LOGI("A2DP  Sink      : Received non SBC codec - not implemented");
-      break;
-    case A2DP_SUBEVENT_SIGNALING_MEDIA_CODEC_SBC_CONFIGURATION: {
-      LOGI("A2DP  Sink      : Received SBC codec configuration");
-      a2dp_conn->sbc_configuration.reconfigure =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_reconfigure(
-              packet);
-      a2dp_conn->sbc_configuration.num_channels =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_num_channels(
-              packet);
-      a2dp_conn->sbc_configuration.sampling_frequency =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_sampling_frequency(
-              packet);
-      a2dp_conn->sbc_configuration.block_length =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_block_length(
-              packet);
-      a2dp_conn->sbc_configuration.subbands =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_subbands(
-              packet);
-      a2dp_conn->sbc_configuration.min_bitpool_value =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_min_bitpool_value(
-              packet);
-      a2dp_conn->sbc_configuration.max_bitpool_value =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_max_bitpool_value(
-              packet);
-
-      allocation_method =
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_allocation_method(
-              packet);
-
-      // Adapt Bluetooth spec definition to SBC Encoder expected input
-      a2dp_conn->sbc_configuration.allocation_method =
-          (btstack_sbc_allocation_method_t)(allocation_method - 1);
-
-      switch (
-          a2dp_subevent_signaling_media_codec_sbc_configuration_get_channel_mode(
-              packet)) {
-      case AVDTP_CHANNEL_MODE_JOINT_STEREO:
-        a2dp_conn->sbc_configuration.channel_mode =
-            SBC_CHANNEL_MODE_JOINT_STEREO;
+      case A2DP_SUBEVENT_SIGNALING_MEDIA_CODEC_OTHER_CONFIGURATION:
+        LOGI("A2DP  Sink      : Received non SBC codec - not implemented");
         break;
-      case AVDTP_CHANNEL_MODE_STEREO:
-        a2dp_conn->sbc_configuration.channel_mode = SBC_CHANNEL_MODE_STEREO;
-        break;
-      case AVDTP_CHANNEL_MODE_DUAL_CHANNEL:
-        a2dp_conn->sbc_configuration.channel_mode =
-            SBC_CHANNEL_MODE_DUAL_CHANNEL;
-        break;
-      case AVDTP_CHANNEL_MODE_MONO:
-        a2dp_conn->sbc_configuration.channel_mode = SBC_CHANNEL_MODE_MONO;
-        break;
-      default:
-        btstack_assert(false);
+      case A2DP_SUBEVENT_SIGNALING_MEDIA_CODEC_SBC_CONFIGURATION: {
+        dec.setValues(packet, size);
         break;
       }
-      dump_sbc_configuration(&a2dp_conn->sbc_configuration);
-      break;
-    }
-    case A2DP_SUBEVENT_STREAM_ESTABLISHED:
-      a2dp_subevent_stream_established_get_bd_addr(packet, a2dp_conn->addr);
+      case A2DP_SUBEVENT_STREAM_ESTABLISHED:
+        a2dp_subevent_stream_established_get_bd_addr(packet, a2dp_conn->addr);
 
-      status = a2dp_subevent_stream_established_get_status(packet);
-      if (status != ERROR_CODE_SUCCESS) {
-        LOGE("A2DP  Sink      : Streaming connection failed, status 0x%02x",
-             status);
+        status = a2dp_subevent_stream_established_get_status(packet);
+        if (status != ERROR_CODE_SUCCESS) {
+          LOGE("A2DP  Sink      : Streaming connection failed, status 0x%02x",
+               status);
+          break;
+        }
+
+        a2dp_conn->a2dp_cid =
+            a2dp_subevent_stream_established_get_a2dp_cid(packet);
+        a2dp_conn->stream_state = STREAM_STATE_OPEN;
+
+        LOGI(
+            "A2DP  Sink      : Streaming connection is established, address "
+            "%s, "
+            "cid 0x%02X, local seid %d",
+            bd_addr_to_str(address), a2dp_conn->a2dp_cid,
+            a2dp_conn->a2dp_local_seid);
         break;
-      }
-
-      a2dp_conn->a2dp_cid =
-          a2dp_subevent_stream_established_get_a2dp_cid(packet);
-      a2dp_conn->stream_state = STREAM_STATE_OPEN;
-
-      LOGI("A2DP  Sink      : Streaming connection is established, address "
-           "%s, "
-           "cid 0x%02X, local seid %d",
-           bd_addr_to_str(address), a2dp_conn->a2dp_cid,
-           a2dp_conn->a2dp_local_seid);
-      break;
 
 #ifdef ENABLE_AVDTP_ACCEPTOR_EXPLICIT_START_STREAM_CONFIRMATION
-    case A2DP_SUBEVENT_START_STREAM_REQUESTED:
-      LOGI("A2DP  Sink      : Explicit Accept to start stream, local_seid "
-           "0x%02x",
-           a2dp_subevent_start_stream_requested_get_local_seid(packet));
-      // ps
-      a2dp_sink_start_stream_accept(a2dp_conn->a2dp_cid,
-                                    a2dp_conn->a2dp_local_seid);
-      break;
+      case A2DP_SUBEVENT_START_STREAM_REQUESTED:
+        LOGI(
+            "A2DP  Sink      : Explicit Accept to start stream, local_seid "
+            "0x%02x",
+            a2dp_subevent_start_stream_requested_get_local_seid(packet));
+        // ps
+        a2dp_sink_start_stream_accept(a2dp_conn->a2dp_cid,
+                                      a2dp_conn->a2dp_local_seid);
+        break;
 #endif
-    case A2DP_SUBEVENT_STREAM_STARTED:
-      LOGI("A2DP  Sink      : Stream started");
-      a2dp_conn->stream_state = STREAM_STATE_PLAYING;
-      if (a2dp_conn->sbc_configuration.reconfigure) {
+      case A2DP_SUBEVENT_STREAM_STARTED: {
+        LOGI("A2DP  Sink      : Stream started");
+        auto &dec = get_decoder();
+        a2dp_conn->stream_state = STREAM_STATE_PLAYING;
+        if (dec.isReconfigure()) {
+          media_processing_close();
+        }
+        // prepare media processing
+        media_processing_init();
+        // audio stream is started when buffer reaches minimal level
+      } break;
+
+      case A2DP_SUBEVENT_STREAM_SUSPENDED:
+        LOGI("A2DP  Sink      : Stream paused");
+        a2dp_conn->stream_state = STREAM_STATE_PAUSED;
+        media_processing_pause();
+        break;
+
+      case A2DP_SUBEVENT_STREAM_RELEASED:
+        LOGI("A2DP  Sink      : Stream released");
+        a2dp_conn->stream_state = STREAM_STATE_CLOSED;
         media_processing_close();
-      }
-      // prepare media processing
-      media_processing_init(&a2dp_conn->sbc_configuration);
-      // audio stream is started when buffer reaches minimal level
-      break;
+        break;
 
-    case A2DP_SUBEVENT_STREAM_SUSPENDED:
-      LOGI("A2DP  Sink      : Stream paused");
-      a2dp_conn->stream_state = STREAM_STATE_PAUSED;
-      media_processing_pause();
-      break;
+      case A2DP_SUBEVENT_SIGNALING_CONNECTION_RELEASED:
+        LOGI("A2DP  Sink      : Signaling connection released");
+        a2dp_conn->a2dp_cid = 0;
+        media_processing_close();
+        break;
 
-    case A2DP_SUBEVENT_STREAM_RELEASED:
-      LOGI("A2DP  Sink      : Stream released");
-      a2dp_conn->stream_state = STREAM_STATE_CLOSED;
-      media_processing_close();
-      break;
-
-    case A2DP_SUBEVENT_SIGNALING_CONNECTION_RELEASED:
-      LOGI("A2DP  Sink      : Signaling connection released");
-      a2dp_conn->a2dp_cid = 0;
-      media_processing_close();
-      break;
-
-    default:
-      break;
+      default:
+        break;
     }
   }
 
@@ -828,5 +735,4 @@ void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
                                                   size);
 }
 
-
-} // namespace btstack_a2dp
+}  // namespace btstack_a2dp
