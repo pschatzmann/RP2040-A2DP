@@ -118,6 +118,13 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classbtstack__a2dp_1_1_a2_d_p_sink_class.html#a5e2c2902940f58237faf7df34c300dde">end</a> ()</td></tr>
 <tr class="memdesc:a5e2c2902940f58237faf7df34c300dde"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stops the processing. <br /></td></tr>
 <tr class="separator:a5e2c2902940f58237faf7df34c300dde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a13338af75056e36ba7afb4577bc663fd"><td class="memItemLeft" align="right" valign="top"><a id="a13338af75056e36ba7afb4577bc663fd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classbtstack__a2dp_1_1_a2_d_p_sink_class.html#a13338af75056e36ba7afb4577bc663fd">setDecoder</a> (<a class="el" href="classbtstack__a2dp_1_1_a2_d_p_decoder.html">A2DPDecoder</a> &amp;dec)</td></tr>
+<tr class="memdesc:a13338af75056e36ba7afb4577bc663fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the decoder. <br /></td></tr>
+<tr class="separator:a13338af75056e36ba7afb4577bc663fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a22207bc7307881461f57a47f3372a79b"><td class="memItemLeft" align="right" valign="top"><a id="a22207bc7307881461f57a47f3372a79b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>resetDecoder</b> ()</td></tr>
+<tr class="separator:a22207bc7307881461f57a47f3372a79b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a75d093267cf314d091ba587e03d7c87e"><td class="memItemLeft" align="right" valign="top"><a id="a75d093267cf314d091ba587e03d7c87e"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>setPower</b> (bool on)</td></tr>
 <tr class="separator:a75d093267cf314d091ba587e03d7c87e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -200,15 +207,17 @@ int16_t&#160;</td><td class="memItemRight" valign="bottom"><b>get_max_input_ampl
 <tr class="memitem:a9c7c065dfa08948c312ae6d20ceaccde"><td class="memItemLeft" align="right" valign="top"><a id="a9c7c065dfa08948c312ae6d20ceaccde"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>get_avrcp_cid</b> ()</td></tr>
 <tr class="separator:a9c7c065dfa08948c312ae6d20ceaccde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ac765848532fcee676f5398f1779120"><td class="memItemLeft" align="right" valign="top"><a id="a4ac765848532fcee676f5398f1779120"></a>
+<a class="el" href="classbtstack__a2dp_1_1_a2_d_p_decoder.html">A2DPDecoder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get_decoder</b> ()</td></tr>
+<tr class="separator:a4ac765848532fcee676f5398f1779120"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4596c551d888ee062246c5e0d029ebf6"><td class="memItemLeft" align="right" valign="top"><a id="a4596c551d888ee062246c5e0d029ebf6"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>set_playing</b> (bool playing) override</td></tr>
 <tr class="separator:a4596c551d888ee062246c5e0d029ebf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4a76778283bd6d4e6a7ae251a43f1c37"><td class="memItemLeft" align="right" valign="top"><a id="a4a76778283bd6d4e6a7ae251a43f1c37"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_and_avrcp_setup</b> (void)</td></tr>
+<tr class="memitem:a4a76778283bd6d4e6a7ae251a43f1c37"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classbtstack__a2dp_1_1_a2_d_p_sink_class.html#a4a76778283bd6d4e6a7ae251a43f1c37">a2dp_and_avrcp_setup</a> (void)</td></tr>
 <tr class="separator:a4a76778283bd6d4e6a7ae251a43f1c37"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a265f9fa6d24ccb21e1f9bd33ad30c757"><td class="memItemLeft" align="right" valign="top"><a id="a265f9fa6d24ccb21e1f9bd33ad30c757"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_init</b> (<a class="el" href="structbtstack__a2dp_1_1_a2_d_p_common_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a> *configuration)</td></tr>
-<tr class="separator:a265f9fa6d24ccb21e1f9bd33ad30c757"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe172f516aad3b1a937d8ec1827886bf"><td class="memItemLeft" align="right" valign="top"><a id="abe172f516aad3b1a937d8ec1827886bf"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_init</b> ()</td></tr>
+<tr class="separator:abe172f516aad3b1a937d8ec1827886bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af2ac443793a208f1f6291b3db0d30761"><td class="memItemLeft" align="right" valign="top"><a id="af2ac443793a208f1f6291b3db0d30761"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_start</b> (void)</td></tr>
 <tr class="separator:af2ac443793a208f1f6291b3db0d30761"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -219,7 +228,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_paus
 void&#160;</td><td class="memItemRight" valign="bottom"><b>media_processing_close</b> (void)</td></tr>
 <tr class="separator:aff5c94ece7278544a52ba8bc97248c5c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a643bad9ddfa78c035fc6b144565644d3"><td class="memItemLeft" align="right" valign="top"><a id="a643bad9ddfa78c035fc6b144565644d3"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>local_sink_handle_l2cap_media_data_packet</b> (uint8_t seid, uint8_t *packet, uint16_t size)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classbtstack__a2dp_1_1_a2_d_p_sink_class.html#a643bad9ddfa78c035fc6b144565644d3">local_sink_handle_l2cap_media_data_packet</a> (uint8_t seid, uint8_t *packet, uint16_t size)</td></tr>
+<tr class="memdesc:a643bad9ddfa78c035fc6b144565644d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Here the audio data, are received through the sink_handle_l2cap_media_data_packet callback. Currently, only the SBC media codec is supported. Hence, the media data consists of the media packet header and the SBC packet. The SBC frame will be stored in a ring buffer for later processing (instead of decoding it to PCM right away which would require a much larger buffer). If the audio stream wasn't started already and there are enough SBC frames in the ring buffer, start playback. <br /></td></tr>
 <tr class="separator:a643bad9ddfa78c035fc6b144565644d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac68304dfcab81a5d5c248304885fe884"><td class="memItemLeft" align="right" valign="top"><a id="ac68304dfcab81a5d5c248304885fe884"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>play_audio</b> ()</td></tr>
@@ -230,9 +240,6 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>read_sbc_header</b> (u
 <tr class="memitem:a1b2720678850d7f56b02d68f3e19d73a"><td class="memItemLeft" align="right" valign="top"><a id="a1b2720678850d7f56b02d68f3e19d73a"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>read_media_data_header</b> (uint8_t *packet, int size, int *offset, avdtp_media_packet_header_t *media_header)</td></tr>
 <tr class="separator:a1b2720678850d7f56b02d68f3e19d73a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af7031feac758c98c26b09dfa34cfd0dc"><td class="memItemLeft" align="right" valign="top"><a id="af7031feac758c98c26b09dfa34cfd0dc"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dump_sbc_configuration</b> (<a class="el" href="structbtstack__a2dp_1_1_a2_d_p_common_1_1media__codec__configuration__sbc__t.html">media_codec_configuration_sbc_t</a> *configuration)</td></tr>
-<tr class="separator:af7031feac758c98c26b09dfa34cfd0dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0bfa16edb4352dba35f8092c07205515"><td class="memItemLeft" align="right" valign="top"><a id="a0bfa16edb4352dba35f8092c07205515"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>local_sink_avrcp_packet_handler</b> (uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size)</td></tr>
 <tr class="separator:a0bfa16edb4352dba35f8092c07205515"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -266,6 +273,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>avrcp_volume_changed<
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
+<tr class="memitem:a3c7d01be4515cf2d08e14b2c2f63b855"><td class="memItemLeft" align="right" valign="top"><a id="a3c7d01be4515cf2d08e14b2c2f63b855"></a>
+struct <a class="el" href="structbtstack__a2dp_1_1_a2_d_p_sink_class_1_1a2dp__sink__arduino__stream__endpoint__t.html">btstack_a2dp::A2DPSinkClass::a2dp_sink_arduino_stream_endpoint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_sink_arduino_stream_endpoint</b></td></tr>
+<tr class="separator:a3c7d01be4515cf2d08e14b2c2f63b855"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adc770a5fb4ea979445e6eda2818939a5"><td class="memItemLeft" align="right" valign="top"><a id="adc770a5fb4ea979445e6eda2818939a5"></a>
+struct <a class="el" href="structbtstack__a2dp_1_1_a2_d_p_sink_class_1_1a2dp__sink__arduino__a2dp__connection__t.html">btstack_a2dp::A2DPSinkClass::a2dp_sink_arduino_a2dp_connection_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_sink_arduino_a2dp_connection</b></td></tr>
+<tr class="separator:adc770a5fb4ea979445e6eda2818939a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add5fdcd5ad1ee5b03f61cdd59e06a04f"><td class="memItemLeft" align="right" valign="top"><a id="add5fdcd5ad1ee5b03f61cdd59e06a04f"></a>
+struct <a class="el" href="structbtstack__a2dp_1_1_a2_d_p_sink_class_1_1a2dp__sink__arduino__avrcp__connection__t.html">btstack_a2dp::A2DPSinkClass::a2dp_sink_arduino_avrcp_connection_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_sink_arduino_avrcp_connection</b></td></tr>
+<tr class="separator:add5fdcd5ad1ee5b03f61cdd59e06a04f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9f681fecfe0aeadf1d60e523874c2512"><td class="memItemLeft" align="right" valign="top"><a id="a9f681fecfe0aeadf1d60e523874c2512"></a>
+<a class="el" href="classbtstack__a2dp_1_1_a2_d_p_decoder_s_b_c.html">A2DPDecoderSBC</a>&#160;</td><td class="memItemRight" valign="bottom"><b>decoder_sbc</b></td></tr>
+<tr class="separator:a9f681fecfe0aeadf1d60e523874c2512"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea7c677aa54e4d18a578f6ff104e4ab7"><td class="memItemLeft" align="right" valign="top"><a id="aea7c677aa54e4d18a578f6ff104e4ab7"></a>
+<a class="el" href="classbtstack__a2dp_1_1_a2_d_p_decoder.html">A2DPDecoder</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>p_decoder</b> = &amp;decoder_sbc</td></tr>
+<tr class="separator:aea7c677aa54e4d18a578f6ff104e4ab7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5b10c632e3e9fab162b0d3644d6a5a1b"><td class="memItemLeft" align="right" valign="top"><a id="a5b10c632e3e9fab162b0d3644d6a5a1b"></a>
 const char *&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_name</b> = &quot;rp2040&quot;</td></tr>
 <tr class="separator:a5b10c632e3e9fab162b0d3644d6a5a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -275,9 +297,8 @@ AdapterAudioStreamToAudioPrint&#160;</td><td class="memItemRight" valign="bottom
 <tr class="memitem:aa49aa3aea1fd9b98aa2b1933729c2841"><td class="memItemLeft" align="right" valign="top"><a id="aa49aa3aea1fd9b98aa2b1933729c2841"></a>
 EncodedAudioPrint&#160;</td><td class="memItemRight" valign="bottom"><b>dec_stream</b></td></tr>
 <tr class="separator:aa49aa3aea1fd9b98aa2b1933729c2841"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac0fbc65dc24a58ce6ac87fb1e8e72394"><td class="memItemLeft" align="right" valign="top"><a id="ac0fbc65dc24a58ce6ac87fb1e8e72394"></a>
-SBCDecoder&#160;</td><td class="memItemRight" valign="bottom"><b>sbc_decoder</b></td></tr>
-<tr class="separator:ac0fbc65dc24a58ce6ac87fb1e8e72394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2960d465db47ce07a2285299facabdaf"><td class="memItemLeft" align="right" valign="top">RingBuffer&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ring_buffer</b></td></tr>
+<tr class="separator:a2960d465db47ce07a2285299facabdaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae9fb297784962975cb0aba0e63c474a8"><td class="memItemLeft" align="right" valign="top"><a id="ae9fb297784962975cb0aba0e63c474a8"></a>
 btstack_packet_callback_registration_t&#160;</td><td class="memItemRight" valign="bottom"><b>hci_event_callback_registration</b></td></tr>
 <tr class="separator:ae9fb297784962975cb0aba0e63c474a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -293,10 +314,6 @@ uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>sdp_avrcp_controll
 <tr class="memitem:a573639ec673da81e8135887ec3dddf9e"><td class="memItemLeft" align="right" valign="top"><a id="a573639ec673da81e8135887ec3dddf9e"></a>
 uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>device_id_sdp_service_buffer</b> [100]</td></tr>
 <tr class="separator:a573639ec673da81e8135887ec3dddf9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab66e7281d8bee7fbb419f833d6cad9db"><td class="memItemLeft" align="right" valign="top">uint8_t&#160;</td><td class="memItemRight" valign="bottom"><b>media_sbc_codec_capabilities</b> [4]</td></tr>
-<tr class="separator:ab66e7281d8bee7fbb419f833d6cad9db"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2960d465db47ce07a2285299facabdaf"><td class="memItemLeft" align="right" valign="top">RingBuffer&lt; uint8_t &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ring_buffer</b></td></tr>
-<tr class="separator:a2960d465db47ce07a2285299facabdaf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9721aebb18e2f24de29c32606fac09f5"><td class="memItemLeft" align="right" valign="top"><a id="a9721aebb18e2f24de29c32606fac09f5"></a>
 unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>sbc_frame_size</b></td></tr>
 <tr class="separator:a9721aebb18e2f24de29c32606fac09f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -306,24 +323,15 @@ int&#160;</td><td class="memItemRight" valign="bottom"><b>media_initialized</b> 
 <tr class="memitem:abd868c45afcfa7916ef94975297f1821"><td class="memItemLeft" align="right" valign="top"><a id="abd868c45afcfa7916ef94975297f1821"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>audio_stream_started</b></td></tr>
 <tr class="separator:abd868c45afcfa7916ef94975297f1821"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a120b69cf7c85144132b3762cb5361aea"><td class="memItemLeft" align="right" valign="top"><a id="a120b69cf7c85144132b3762cb5361aea"></a>
-int16_t *&#160;</td><td class="memItemRight" valign="bottom"><b>request_buffer</b></td></tr>
-<tr class="separator:a120b69cf7c85144132b3762cb5361aea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a178358d1ec4db42c9ce820230c33cc05"><td class="memItemLeft" align="right" valign="top"><a id="a178358d1ec4db42c9ce820230c33cc05"></a>
 int&#160;</td><td class="memItemRight" valign="bottom"><b>request_frames</b></td></tr>
 <tr class="separator:a178358d1ec4db42c9ce820230c33cc05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4ef6c7bcdb55de824bac73521dc4dd46"><td class="memItemLeft" align="right" valign="top"><a id="a4ef6c7bcdb55de824bac73521dc4dd46"></a>
 avrcp_battery_status_t&#160;</td><td class="memItemRight" valign="bottom"><b>battery_status</b> = AVRCP_BATTERY_STATUS_WARNING</td></tr>
 <tr class="separator:a4ef6c7bcdb55de824bac73521dc4dd46"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3c7d01be4515cf2d08e14b2c2f63b855"><td class="memItemLeft" align="right" valign="top"><a id="a3c7d01be4515cf2d08e14b2c2f63b855"></a>
-struct <a class="el" href="structbtstack__a2dp_1_1_a2_d_p_sink_class_1_1a2dp__sink__arduino__stream__endpoint__t.html">btstack_a2dp::A2DPSinkClass::a2dp_sink_arduino_stream_endpoint_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_sink_arduino_stream_endpoint</b></td></tr>
-<tr class="separator:a3c7d01be4515cf2d08e14b2c2f63b855"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adc770a5fb4ea979445e6eda2818939a5"><td class="memItemLeft" align="right" valign="top"><a id="adc770a5fb4ea979445e6eda2818939a5"></a>
-struct <a class="el" href="structbtstack__a2dp_1_1_a2_d_p_sink_class_1_1a2dp__sink__arduino__a2dp__connection__t.html">btstack_a2dp::A2DPSinkClass::a2dp_sink_arduino_a2dp_connection_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_sink_arduino_a2dp_connection</b></td></tr>
-<tr class="separator:adc770a5fb4ea979445e6eda2818939a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:add5fdcd5ad1ee5b03f61cdd59e06a04f"><td class="memItemLeft" align="right" valign="top"><a id="add5fdcd5ad1ee5b03f61cdd59e06a04f"></a>
-struct <a class="el" href="structbtstack__a2dp_1_1_a2_d_p_sink_class_1_1a2dp__sink__arduino__avrcp__connection__t.html">btstack_a2dp::A2DPSinkClass::a2dp_sink_arduino_avrcp_connection_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>a2dp_sink_arduino_avrcp_connection</b></td></tr>
-<tr class="separator:add5fdcd5ad1ee5b03f61cdd59e06a04f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a120b69cf7c85144132b3762cb5361aea"><td class="memItemLeft" align="right" valign="top"><a id="a120b69cf7c85144132b3762cb5361aea"></a>
+int16_t *&#160;</td><td class="memItemRight" valign="bottom"><b>request_buffer</b></td></tr>
+<tr class="separator:a120b69cf7c85144132b3762cb5361aea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adc6af2c88ba23960de5d0e08debe5567"><td class="memItemLeft" align="right" valign="top"><a id="adc6af2c88ba23960de5d0e08debe5567"></a>
 VolumeStream&#160;</td><td class="memItemRight" valign="bottom"><b>volume_stream</b></td></tr>
 <tr class="separator:adc6af2c88ba23960de5d0e08debe5567"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -364,9 +372,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sink_avrcp_target_pac
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A2DPSink for the RP2040. </p>
 <dl class="section author"><dt>Author</dt><dd>Phil Schatzmann </dd></dl>
-</div><h2 class="groupheader">Member Data Documentation</h2>
-<a id="ab66e7281d8bee7fbb419f833d6cad9db"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab66e7281d8bee7fbb419f833d6cad9db">&#9670;&nbsp;</a></span>media_sbc_codec_capabilities</h2>
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4a76778283bd6d4e6a7ae251a43f1c37"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4a76778283bd6d4e6a7ae251a43f1c37">&#9670;&nbsp;</a></span>a2dp_and_avrcp_setup()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -375,23 +383,33 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>sink_avrcp_target_pac
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">uint8_t btstack_a2dp::A2DPSinkClass::media_sbc_codec_capabilities[4]</td>
+          <td class="memname">int btstack_a2dp::A2DPSinkClass::a2dp_and_avrcp_setup </td>
+          <td>(</td>
+          <td class="paramtype">void&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">protected</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
-<b>Initial value:</b><div class="fragment"><div class="line">= {</div>
-<div class="line">      0xFF, </div>
-<div class="line">      0xFF, </div>
-<div class="line">            </div>
-<div class="line">      2, 53}</div>
-</div><!-- fragment -->
+<p>@text The Listing MainConfiguration shows how to set up AD2P Sink and AVRCP services. Besides calling init() method for each service, you'll also need to register several packet handlers:</p><ul>
+<li>sink_hci_packet_handler - handles legacy pairing, here by using fixed '0000' pin code.</li>
+<li>sink_a2dp_packet_handler - handles events on stream connection status (established, released), the media codec configuration, and, the status of the stream itself (opened, paused, stopped).</li>
+<li>sink_handle_l2cap_media_data_packet - used to receive streaming SBC data.</li>
+<li>sink_avrcp_packet_handler - receives connect/disconnect event.</li>
+<li>sink_avrcp_controller_packet_handler - receives answers for sent AVRCP commands.</li>
+<li>sink_avrcp_target_packet_handler - receives AVRCP commands, and registered notifications.</li>
+</ul>
+<p>@text To announce A2DP Sink and AVRCP services, you need to create corresponding SDP records and register them with the SDP service.</p>
+<p>@text Note, currently only the SBC codec is supported. </p>
+
 </div>
 </div>
+<h2 class="groupheader">Member Data Documentation</h2>
 <a id="a2960d465db47ce07a2285299facabdaf"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a2960d465db47ce07a2285299facabdaf">&#9670;&nbsp;</a></span>ring_buffer</h2>
 

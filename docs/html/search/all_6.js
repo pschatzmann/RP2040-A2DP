@@ -1,6 +1,4 @@
 var searchData=
 [
-  ['pause_14',['pause',['../classbtstack__a2dp_1_1_a2_d_p_common.html#adf64305b2723e7a4e2f353ebb8992f32',1,'btstack_a2dp::A2DPCommon']]],
-  ['play_15',['play',['../classbtstack__a2dp_1_1_a2_d_p_common.html#a00a55e4ee2990a3569a228e02b2ade74',1,'btstack_a2dp::A2DPCommon']]],
-  ['previous_16',['previous',['../classbtstack__a2dp_1_1_a2_d_p_common.html#ab631fd9513ef6606290a87b1ec3271f7',1,'btstack_a2dp::A2DPCommon']]]
+  ['next_20',['next',['../classbtstack__a2dp_1_1_a2_d_p_common.html#a032148cafc6cbc018867e8f4c70f610b',1,'btstack_a2dp::A2DPCommon']]]
 ];

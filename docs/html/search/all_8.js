@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['setmetadatacallback_19',['setMetadataCallback',['../classbtstack__a2dp_1_1_a2_d_p_common.html#ac243fda25c894953c3ffd155b4fe052a',1,'btstack_a2dp::A2DPCommon']]],
-  ['setvolume_20',['setVolume',['../classbtstack__a2dp_1_1_a2_d_p_common.html#ae12a9cd369bdb0d9e481b5f084698474',1,'btstack_a2dp::A2DPCommon']]],
-  ['stop_21',['stop',['../classbtstack__a2dp_1_1_a2_d_p_common.html#ab84893714f153f87ea19f42b2aaa4a22',1,'btstack_a2dp::A2DPCommon']]]
+  ['resetencoder_24',['resetEncoder',['../classbtstack__a2dp_1_1_a2_d_p_source_class.html#ace02612c7481d1d5fe91466f6fe38785',1,'btstack_a2dp::A2DPSourceClass']]],
+  ['rewind_25',['rewind',['../classbtstack__a2dp_1_1_a2_d_p_common.html#a89718b5d213a9fe0d2c8a7e96751be9f',1,'btstack_a2dp::A2DPCommon']]],
+  ['rp2040_20a2dp_26',['RP2040 A2DP',['../index.html',1,'']]]
 ];

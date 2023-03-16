@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['media_5fcodec_5fconfiguration_5fsbc_5ft_12',['media_codec_configuration_sbc_t',['../structbtstack__a2dp_1_1_a2_d_p_common_1_1media__codec__configuration__sbc__t.html',1,'btstack_a2dp::A2DPCommon']]]
+  ['local_5fsink_5fhandle_5fl2cap_5fmedia_5fdata_5fpacket_18',['local_sink_handle_l2cap_media_data_packet',['../classbtstack__a2dp_1_1_a2_d_p_sink_class.html#a643bad9ddfa78c035fc6b144565644d3',1,'btstack_a2dp::A2DPSinkClass']]]
 ];
