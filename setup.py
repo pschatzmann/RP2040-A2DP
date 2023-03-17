@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+#
+# setup.py
+#
+# Creates a local copy of the btstack source code in the src directory which 
+# follows the Arduino conventions
+#
 import os, command, shutil
 from subprocess import run
 
@@ -131,8 +137,7 @@ if res.exit==0:
     copy_files()
     cleanup("src/btstack")
     fix_includes("src/btstack")
-    # compile errors
-    # apply_if("src/btstack/btstack_crypto.c","!defined(ARDUINO)")
+    # fix compile errors
     remove_dir("src/btstack/3rd-party/micro-eec/test")
     remove_dir("src/btstack/mesh")
     print("setup completed")
