@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['rewind_0',['rewind',['../classa2dp__rp2040_1_1_a2_d_p_common.html#a52e3412abf974ad0828fdb63e3a76ba8',1,'a2dp_rp2040::A2DPCommon']]],
-  ['rp2040_20a2dp_1',['RP2040 A2DP',['../index.html',1,'']]]
+  ['pause_21',['pause',['../classbtstack__a2dp_1_1_a2_d_p_common.html#adf64305b2723e7a4e2f353ebb8992f32',1,'btstack_a2dp::A2DPCommon']]],
+  ['play_22',['play',['../classbtstack__a2dp_1_1_a2_d_p_common.html#a00a55e4ee2990a3569a228e02b2ade74',1,'btstack_a2dp::A2DPCommon']]],
+  ['previous_23',['previous',['../classbtstack__a2dp_1_1_a2_d_p_common.html#ab631fd9513ef6606290a87b1ec3271f7',1,'btstack_a2dp::A2DPCommon']]]
 ];

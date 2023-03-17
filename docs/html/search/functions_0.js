@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['begin_0',['begin',['../classa2dp__rp2040_1_1_a2_d_p_sink_class.html#a87e89c989161ecca869ddd653d8176fa',1,'a2dp_rp2040::A2DPSinkClass::begin(const char *name)'],['../classa2dp__rp2040_1_1_a2_d_p_sink_class.html#ad6d45e1a6e5750956b5d038483bae640',1,'a2dp_rp2040::A2DPSinkClass::begin(AudioPrint &amp;out, const char *name)']]]
+  ['a2dp_5fand_5favrcp_5fsetup_48',['a2dp_and_avrcp_setup',['../classbtstack__a2dp_1_1_a2_d_p_sink_class.html#a4a76778283bd6d4e6a7ae251a43f1c37',1,'btstack_a2dp::A2DPSinkClass']]],
+  ['a2dp_5fsource_5fand_5favrcp_5fservices_5finit_49',['a2dp_source_and_avrcp_services_init',['../classbtstack__a2dp_1_1_a2_d_p_source_class.html#a17d8eefe3ab0f4376af50bd571aa94d9',1,'btstack_a2dp::A2DPSourceClass']]]
 ];

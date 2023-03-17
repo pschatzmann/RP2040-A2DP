@@ -1,18 +1,19 @@
 #pragma once
-#include "A2DPConfigRP2040.h"
+#include "A2DPConfig.h"
 #include "bluetooth.h"
 #include "btstack.h"
 #include "btstack_defines.h"
 #include <pico/cyw43_arch.h>
 
 #include "AudioTools.h"
-#include "AudioCodecs/CodecSBC.h"
+#include "A2DPCodecs.h"
 
 // #define BYTES_PER_FRAME     (2*NUM_CHANNELS)
 // #define BYTES_PER_AUDIO_SAMPLE (2 * NUM_CHANNELS)
 
-namespace a2dp_rp2040 {
+namespace btstack_a2dp {
 
+/// @brief MetadataType
 enum MetadataType {
   MDTitle,
   MDArtist,
@@ -77,9 +78,14 @@ void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
  */
 class A2DPCommon {
 public:
+  bool setPower(bool on) {
+    return hci_power_control(on ? HCI_POWER_ON : HCI_POWER_OFF) ==
+           ERROR_CODE_SUCCESS;
+  }
+
   /// Sets the volume
-  bool setVolume(uint8_t volPercent) {
-    TRACEI();
+  bool setVolume(int volPercent) {
+    LOGI("setVolume: %d", volPercent);
     volume_percentage = volPercent;
     if (volume_percentage > 100) {
       volume_percentage = 100;
@@ -87,10 +93,12 @@ public:
     if (volume_percentage < 0) {
       volume_percentage = 0;
     }
-    int volume = volume_percentage * 127 / 100;
-    int status = avrcp_target_volume_changed(get_avrcp_cid(), volume);
-    avrcp_volume_changed(volume);
-    return status == 0;
+    // Request update from target
+    avrcp_target_volume_changed(get_avrcp_cid(), percent_to_volume(volume_percentage));
+
+    // update volume stream
+    avrcp_volume_changed(volume_percentage);
+    return true;
   }
 
   /// Provides the actual volume (as %) in the range from 0 to 100
@@ -113,40 +121,42 @@ public:
   /// avrcp play
   bool play() {
     TRACEI();
-    return 0 == avrcp_controller_play(get_avrcp_cid());
+    return ERROR_CODE_SUCCESS == avrcp_controller_play(get_avrcp_cid());
   }
 
   /// avrcp stop
   bool stop() {
     TRACEI();
-    return 0 == avrcp_controller_stop(get_avrcp_cid());
+    return ERROR_CODE_SUCCESS == avrcp_controller_stop(get_avrcp_cid());
   }
 
   /// avrcp pause
   bool pause() {
     TRACEI();
-    return 0 == avrcp_controller_pause(get_avrcp_cid());
+    return ERROR_CODE_SUCCESS == avrcp_controller_pause(get_avrcp_cid());
   }
 
   /// avrcp forward
   bool next() {
     TRACEI();
-    return 0 == avrcp_controller_forward(get_avrcp_cid());
+    return ERROR_CODE_SUCCESS == avrcp_controller_forward(get_avrcp_cid());
   }
 
   /// avrcp backward
   bool previous() {
     TRACEI();
-    return 0 == avrcp_controller_backward(get_avrcp_cid());
+    return ERROR_CODE_SUCCESS == avrcp_controller_backward(get_avrcp_cid());
   }
 
   /// avrcp fast_forwar
   bool fastForward(bool start) {
     TRACEI();
     if (start) {
-      return 0 == avrcp_controller_press_and_hold_fast_forward(get_avrcp_cid());
+      return ERROR_CODE_SUCCESS ==
+             avrcp_controller_press_and_hold_fast_forward(get_avrcp_cid());
     } else {
-      return 0 == avrcp_controller_release_press_and_hold_cmd(get_avrcp_cid());
+      return ERROR_CODE_SUCCESS ==
+             avrcp_controller_release_press_and_hold_cmd(get_avrcp_cid());
     }
   }
 
@@ -154,10 +164,12 @@ public:
   bool rewind(bool start) {
     TRACEI();
     if (start) {
-      return 0 == avrcp_controller_press_and_hold_rewind(get_avrcp_cid());
+      return ERROR_CODE_SUCCESS ==
+             avrcp_controller_press_and_hold_rewind(get_avrcp_cid());
 
     } else {
-      return 0 == avrcp_controller_release_press_and_hold_cmd(get_avrcp_cid());
+      return ERROR_CODE_SUCCESS ==
+             avrcp_controller_release_press_and_hold_cmd(get_avrcp_cid());
     }
   }
 
@@ -165,19 +177,15 @@ public:
   bool isBLEEnabled() { return is_ble_enabled; }
   void setBLEEnabled(bool active) { is_ble_enabled = active; }
 
-protected:
+  void setIsDiscoverable(bool enable) {
+    return gap_discoverable_control(enable);
+  }
 
-  struct media_codec_configuration_sbc_t {
-    uint8_t reconfigure;
-    uint8_t num_channels;
-    uint16_t sampling_frequency;
-    uint8_t block_length;
-    uint8_t subbands;
-    uint8_t min_bitpool_value;
-    uint8_t max_bitpool_value;
-    btstack_sbc_channel_mode_t channel_mode;
-    btstack_sbc_allocation_method_t allocation_method;
-  };
+  void setIsConnectable(bool enable) {
+    return gap_connectable_control(enable);
+  }
+
+protected:
 
   VolumeStream volume_stream;
   int volume_percentage = 100;
@@ -186,11 +194,18 @@ protected:
   void (*metadata_callback)(MetadataType type, const char *data,
                             uint32_t value) = nullptr;
 
+
   virtual int get_avrcp_cid() = 0;
 
   virtual void set_playing(bool playing) { is_playing = playing; }
 
-  bool is_valid_playstatus(int status) { return (status >= 1) && (status <= 4); }
+  int percent_to_volume(int percent) { return volume_percentage * 127 / 100; }
+
+  int volume_to_percent(int volume) { return volume * 100 / 127; }
+
+  float volume_as_float(int volume_percent) { return 0.01f * volume_percent; }
+
+  bool is_valid_playstatus(int status) { return (status >= 1) && (status <= 4);}
 
   virtual void local_avrcp_controller_packet_handler(uint8_t packet_type,
                                                      uint16_t channel,
@@ -218,9 +233,8 @@ protected:
     switch (packet[2]) {
 
     case AVRCP_SUBEVENT_NOTIFICATION_VOLUME_CHANGED: {
-      int vol = avrcp_subevent_notification_volume_changed_get_absolute_volume(
-                    packet) *
-                100 / 127;
+      int vol = volume_to_percent(avrcp_subevent_notification_volume_changed_get_absolute_volume(
+                    packet));
       LOGI("AVRCP Controller: Notification Absolute Volume %d %%", vol);
       avrcp_volume_changed(vol);
     } break;
@@ -397,11 +411,12 @@ protected:
 
   virtual int16_t get_max_input_amplitude() = 0;
 
+  // volume is from 0 to 100
   void avrcp_volume_changed(uint8_t volume) {
     // calculate eff volume factor
     float max_current = get_max_input_amplitude();
     float max_factor = 32767.0f / max_current;
-    float vol_float = 0.01f * volume_percentage;
+    float vol_float = volume_as_float(volume_percentage);
     // We adjust the volume: if we receive only max amplitude of 2500 we can
     // multiply the values by a factor of 13
     float factor = mapFloat(vol_float, 0.0, 1.0, 0.0, max_factor);
@@ -411,4 +426,4 @@ protected:
   }
 };
 
-} // namespace a2dp_rp2040
+} // namespace btstack_a2dp

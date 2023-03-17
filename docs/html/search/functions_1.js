@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['end_0',['end',['../classa2dp__rp2040_1_1_a2_d_p_sink_class.html#a8c778ecf860dfc65e2b7d8b117413cde',1,'a2dp_rp2040::A2DPSinkClass']]]
+  ['begin_50',['begin',['../classbtstack__a2dp_1_1_a2_d_p_sink_class.html#a78037d3709c1f5bc3c01e75c7761c780',1,'btstack_a2dp::A2DPSinkClass::begin(const char *name)'],['../classbtstack__a2dp_1_1_a2_d_p_sink_class.html#ae8c91e27893015c1ebe638b860787231',1,'btstack_a2dp::A2DPSinkClass::begin(AudioPrint &amp;out, const char *name)']]]
 ];

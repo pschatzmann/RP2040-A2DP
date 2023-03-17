@@ -1,5 +1,5 @@
 #include "AudioTools.h"
-#include "A2DP_RP2040.h"
+#include "BTstack_A2DP.h"
 
 I2SStream out;
 
@@ -8,6 +8,7 @@ void setup() {
   waitFor(Serial);
   AudioLogger::instance().begin(Serial, AudioLogger::Info);
 
+  A2DPSink.setVolume(50);
   A2DPSink.begin(out, "rp2040");
 }
 

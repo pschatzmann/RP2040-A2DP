@@ -1,5 +1,5 @@
 /**
- * @file A2DP_RP2040.h
+ * @file btstack_a2dp.h
  * @author Phil Schatzmann
  * @brief Top level include file which also provides the namespace
  * @version 0.1
@@ -10,7 +10,7 @@
  */
 #pragma once
 
-#include "A2DPSourceRP2040.h"
-#include "A2DPSinkRP2040.h"
+#include "A2DPSource.h"
+#include "A2DPSink.h"
 
-using namespace a2dp_rp2040;
+using namespace btstack_a2dp;

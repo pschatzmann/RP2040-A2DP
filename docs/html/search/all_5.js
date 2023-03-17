@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['next_0',['next',['../classa2dp__rp2040_1_1_a2_d_p_common.html#a4824eecce690ad5e1636df9f5ae76254',1,'a2dp_rp2040::A2DPCommon']]]
+  ['media_5fcodec_5fconfiguration_5fsbc_5ft_19',['media_codec_configuration_sbc_t',['../structbtstack__a2dp_1_1media__codec__configuration__sbc__t.html',1,'btstack_a2dp']]]
 ];
