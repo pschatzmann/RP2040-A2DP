@@ -10,9 +10,15 @@
  */
 #pragma once
 
-#if !ENABLE_CLASSIC
-#error Bluetooth was not enabled!
+#ifdef ARDUINO_RASPBERRY_PI_PICO_W
+#  if !ENABLE_CLASSIC 
+#    error Bluetooth was not enabled!
+#  endif
+#  define USE_LOCAL_BTSTACK false
+#else
+#  define USE_LOCAL_BTSTACK true
 #endif
+
 
 // Common
 #define BTSTACK_FILE__ "btstack_a2dp"

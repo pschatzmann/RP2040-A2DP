@@ -25,19 +25,27 @@ def clean_src():
 # copy all relevant files
 def copy_files():
     shutil.copytree('original/btstack/src', 'src/btstack', dirs_exist_ok=True) 
-    shutil.copytree('original/btstack/src/ble', 'src/btstack/ble', dirs_exist_ok=True) 
-    shutil.copytree('original/btstack/src/classic', 'src/btstack/classic', dirs_exist_ok=True) 
-    shutil.copytree('original/btstack/src/le-audio', 'src/btstack/le-audio', dirs_exist_ok=True) 
-    shutil.copytree('original/btstack/src/mesh', 'src/btstack/mesh', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/bluedroid/decoder/include', 'src/btstack/3rd-party/codec', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/bluedroid/decoder/srce', 'src/btstack/3rd-party/codec', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/bluedroid/encoder/include', 'src/btstack/3rd-party/codec', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/bluedroid/encoder/srce', 'src/btstack/3rd-party/codec', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/rijndael', 'src/btstack/3rd-party/rinjndael', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/micro-ecc', 'src/btstack/3rd-party/micro-eec', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/md5', 'src/btstack/3rd-party/md5', dirs_exist_ok=True) 
+    shutil.copytree('original/btstack/3rd-party/yxml', 'src/btstack/3rd-party/yxml', dirs_exist_ok=True) 
+
 
 # deletes a file if it exists
 def remove(file):
     if os.path.exists(file):
         os.remove(file)
 
+def remove_dir(dir):
+    shutil.rmtree(dir)
+
 # checks if the file is valid
 def is_vaid_file(name):
-    return name.endswith(".h") or name.endswith(".c")
+    return name.endswith(".h") or name.endswith(".c") or name.endswith(".inc")
 
 # delete unnecessary files and directories
 def cleanup(root):
@@ -50,15 +58,16 @@ def cleanup(root):
                 remove(filewithpath)
 
 # wrap the file with a ifdef
-def apply_ifdef(filename, define):
+def apply_if(filename, cond):
     text_file = open(filename, "r")
     # read whole file to a string
     text = text_file.read()
-    text.insert(0,"#if defined("+define+")/n")
-    text.add("#endif/n")
+    first = "#if "+cond+"\n"
+    last = "#endif\n"
+    new_text = first + text + last
     text_file.close()
     text_file = open(filename, "w")
-    text_file.write(text)
+    text_file.write(new_text)
     text_file.close()
 
 # find the indicated file by name
@@ -78,6 +87,21 @@ def fix_includes(root):
             filewithpath = os.path.join(path, name)
             fix_includes_in_file(root, filewithpath)
 
+
+def fix_line(line, startChar, endChar, new_txt, root):
+    start = line.index(startChar)+1
+    end = line.rindex(endChar)
+    include_name = line[start:end]
+    new_name = find_file(root, include_name)
+    if new_name.startswith("src/"):
+        new_name = new_name[4:]
+    print("   ", include_name, "->", new_name)
+
+    newline = "#include \""+new_name+"\""
+    new_txt = new_txt.replace(line, newline)
+    return new_txt
+
+
 def fix_includes_in_file(root, fileName):
     text_file = open(fileName, "r")
     # read whole file to a string
@@ -90,17 +114,9 @@ def fix_includes_in_file(root, fileName):
     for line in data.splitlines():
         if "#include" in line:
             if "\"" in line:
-                start = line.index("\"")+1
-                end = line.rindex("\"")
-                include_name = line[start:end]
-                new_name = find_file(root, include_name)
-                if new_name.startswith("src/"):
-                    new_name = new_name[4:]
-                print("   ", include_name, "->", new_name)
-
-                newline = "#include \""+new_name+"\"\n"
-                new_txt = new_txt.replace(line, newline)
-
+                new_txt = fix_line(line,"\"","\"", new_txt, root)
+            if "<" in line:
+                new_txt = fix_line(line,"<",">", new_txt, root)
 
     text_file = open(fileName, "w")
     text_file.write(new_txt)
@@ -115,7 +131,10 @@ if res.exit==0:
     copy_files()
     cleanup("src/btstack")
     fix_includes("src/btstack")
-    # create_data()
+    # compile errors
+    # apply_if("src/btstack/btstack_crypto.c","!defined(ARDUINO)")
+    remove_dir("src/btstack/3rd-party/micro-eec/test")
+    remove_dir("src/btstack/mesh")
     print("setup completed")
 else:
     print("Could not execute git command")

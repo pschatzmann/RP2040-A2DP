@@ -1,9 +1,25 @@
 #pragma once
 #include "A2DPConfig.h"
-#include "bluetooth.h"
-#include "btstack.h"
-#include "btstack_defines.h"
-#include <pico/cyw43_arch.h>
+
+#if defined(ARDUINO_ARCH_MBED_RP2040)
+#  define RP2040_MBED
+#elif defined(ARDUINO_ARCH_RP2040)
+#  define RP2040_HOWER
+#endif
+
+
+#if USE_LOCAL_BTSTACK
+#  include "btstack/bluetooth.h"
+#  include "btstack/btstack.h"
+#  include "btstack/btstack_defines.h"
+#else
+#  include "bluetooth.h"
+#  include "btstack.h"
+#  include "btstack_defines.h"
+#endif
+#ifdef RP2040_HOWER
+#  include <pico/cyw43_arch.h>
+#endif
 
 #include "AudioTools.h"
 #include "A2DPCodecs.h"
@@ -110,13 +126,6 @@ public:
     metadata_callback = callback;
   }
 
-  void lockBluetooth() {
-    async_context_acquire_lock_blocking(cyw43_arch_async_context());
-  }
-
-  void unlockBluetooth() {
-    async_context_release_lock(cyw43_arch_async_context());
-  }
 
   /// avrcp play
   bool play() {
@@ -184,6 +193,17 @@ public:
   void setIsConnectable(bool enable) {
     return gap_connectable_control(enable);
   }
+
+#ifdef RP2040_HOWER
+  void lockBluetooth() {
+    async_context_acquire_lock_blocking(cyw43_arch_async_context());
+  }
+
+  void unlockBluetooth() {
+    async_context_release_lock(cyw43_arch_async_context());
+  }
+#endif
+
 
 protected:
 
