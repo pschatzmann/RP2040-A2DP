@@ -72,31 +72,40 @@ namespace btstack_a2dp {
 
 class A2DPSinkClass : public A2DPCommon {
  public:
+  A2DPSinkClass() = default;
+
+  void setOutput(AudioStream &out) {
+    volume_stream.setOutput(out);
+    dec_stream.setOutput(&volume_stream);
+    dec_stream.setDecoder(&(get_decoder().decoder()));
+  }
+
+  void setOutput(AudioOutput &out) {
+    volume_stream.setOutput(out);
+    dec_stream.setOutput(&volume_stream);
+    dec_stream.setDecoder(&(get_decoder().decoder()));
+  }
+
   /// Starts A2DP Sink with the output to I2S
   bool begin(const char *name) {
-    static I2SStream i2s;
-    return begin(i2s, name);
-  }
-
-  bool begin(AudioStream &out, const char *name) {
-    out_print.setStream(out);
-    return begin(out_print, name);
-  }
-
-  /// Starts A2DP Sink to a defined output
-  bool begin(AudioPrint &out, const char *name) {
-    TRACEI();
+    LOGI("begin: %s", name);
     a2dp_name = name;
+
+    LOGI("Starting BTstack ...\n");
     int rc = a2dp_and_avrcp_setup();
-    volume_stream.setTarget(out);
-    dec_stream.setStream(&volume_stream);
-    dec_stream.setDecoder(&(get_decoder().decoder()));
+    if (rc != 0) {
+      LOGE("a2dp_and_avrcp_setup");
+      return false;
+    }
 
     // turn on!
-    LOGI("Starting BTstack ...\n");
-    hci_power_control(HCI_POWER_ON);
+    LOGI("Power On ...\n");
+    if (hci_power_control(HCI_POWER_ON)!=0){
+      LOGE("hci_power_control");
+      return false;
+    }
 
-    return rc == 0;
+    return true;
   }
 
   /// Stops the processing
@@ -159,8 +168,8 @@ class A2DPSinkClass : public A2DPCommon {
   A2DPDecoderSBC decoder_sbc;
   A2DPDecoder *p_decoder = &decoder_sbc;
   const char *a2dp_name = "rp2040";
-  AdapterAudioStreamToAudioPrint out_print;
-  EncodedAudioPrint dec_stream;
+  AdapterAudioStreamToAudioOutput out_print;
+  EncodedAudioOutput dec_stream;
   RingBuffer<uint8_t> ring_buffer{(OPTIMAL_FRAMES_MAX + ADDITIONAL_FRAMES) *
                                   MAX_SBC_FRAME_SIZE};
   btstack_packet_callback_registration_t hci_event_callback_registration;
@@ -210,16 +219,16 @@ class A2DPSinkClass : public A2DPCommon {
    */
 
   int a2dp_and_avrcp_setup(void) {
-    TRACED();
-
+    LOGI("a2dp_and_avrcp_setup");
     l2cap_init();
 
+#ifdef ENABLE_BLE
     if (isBLEEnabled()) {
       // Initialize LE Security Manager. Needed for cross-transport key
       // derivation
       sm_init();
     }
-
+#endif
     // Initialize AVDTP Sink
     a2dp_sink_init();
     a2dp_sink_register_packet_handler(&sink_a2dp_packet_handler);
@@ -234,7 +243,7 @@ class A2DPSinkClass : public A2DPCommon {
             AVDTP_AUDIO, dec.codecType(), dec.codecCapabilities(),
             dec.codecCapabilitiesSize(), dec.config(), dec.configSize());
     if (!local_stream_endpoint) {
-      printf("A2DP Sink: not enough memory to create local stream endpoint\n");
+      LOGE("A2DP Sink: not enough memory to create local stream endpoint\n");
       return 1;
     }
 
@@ -283,8 +292,7 @@ class A2DPSinkClass : public A2DPCommon {
     // Category 2 commands from the media player, e.g. volume up/down
     memset(sdp_avrcp_target_service_buffer, 0,
            sizeof(sdp_avrcp_target_service_buffer));
-    uint16_t target_supported_features =
-        AVRCP_FEATURE_MASK_CATEGORY_MONITOR_OR_AMPLIFIER;
+    uint16_t target_supported_features = AVRCP_FEATURE_MASK_CATEGORY_MONITOR_OR_AMPLIFIER;
     avrcp_target_create_sdp_record(sdp_avrcp_target_service_buffer, 0x10003,
                                    target_supported_features, NULL, NULL);
     sdp_register_service(sdp_avrcp_target_service_buffer);
@@ -325,7 +333,7 @@ class A2DPSinkClass : public A2DPCommon {
   /* LISTING_END */
 
   int media_processing_init() {
-    TRACED();
+    LOGI("media_processing_init");
     if (media_initialized) return 0;
 
     auto &dec = get_decoder();
@@ -351,7 +359,7 @@ class A2DPSinkClass : public A2DPCommon {
   }
 
   void media_processing_start(void) {
-    TRACED();
+    LOGI("media_processing_start");
     if (!media_initialized) return;
 
     dec_stream.begin();
@@ -359,14 +367,14 @@ class A2DPSinkClass : public A2DPCommon {
   }
 
   void media_processing_pause(void) {
-    TRACED();
+    LOGI("media_processing_pause");
     if (!media_initialized) return;
     // stop audio playback
     audio_stream_started = 0;
   }
 
   void media_processing_close(void) {
-    TRACED();
+    LOGI("media_processing_close");
     if (!media_initialized) return;
     media_initialized = 0;
     audio_stream_started = 0;
@@ -375,7 +383,7 @@ class A2DPSinkClass : public A2DPCommon {
     dec_stream.end();
   }
 
-  /** 
+  /**
    * @brief Here the audio data, are received through the
    * sink_handle_l2cap_media_data_packet callback. Currently, only the SBC media
    * codec is supported. Hence, the media data consists of the media packet
@@ -386,48 +394,24 @@ class A2DPSinkClass : public A2DPCommon {
    * playback.
    */
 
-  void local_sink_handle_l2cap_media_data_packet(uint8_t seid, uint8_t *packet,
+  void handle_l2cap_media_data_packet(uint8_t seid, uint8_t *packet,
                                                  uint16_t size) {
-    UNUSED(seid);
-    TRACED();
+    LOGI("handle_l2cap_media_data_packet");
     int pos = 0;
-
+    //   avdtp_media_packet_header_t media_header;
     avdtp_media_packet_header_t media_header;
     if (!read_media_data_header(packet, size, &pos, &media_header)) return;
-
     avdtp_sbc_codec_header_t sbc_header;
     if (!read_sbc_header(packet, size, &pos, &sbc_header)) return;
 
     // store sbc frame size for buffer management
     sbc_frame_size = (size - pos) / sbc_header.num_frames;
-    int len_written = ring_buffer.writeArray(packet + pos, size - pos);
-    if (len_written != size - pos) {
-      LOGE("Error storing samples in SBC ring buffer");
-    }
-    // start stream if enough frames buffered
-    int sbc_frames_in_buffer = ring_buffer.available() / sbc_frame_size;
-    if (!audio_stream_started && sbc_frames_in_buffer >= OPTIMAL_FRAMES_MIN) {
-      media_processing_start();
-    }
-
-    // output audio as PCM
-    play_audio();
-  }
-
-  void play_audio() {
-    if (!audio_stream_started) return;
-    // copy ringbuffer to decoder stream
-    uint8_t sbc_frame[MAX_SBC_FRAME_SIZE];
-    while (ring_buffer.available() >= sbc_frame_size) {
-      // decode frame
-      int bytes_read = ring_buffer.readArray(sbc_frame, sbc_frame_size);
-      dec_stream.write(sbc_frame, bytes_read);
-    }
+    dec_stream.write(packet + pos, size - pos);
   }
 
   int read_sbc_header(uint8_t *packet, int size, int *offset,
                       avdtp_sbc_codec_header_t *sbc_header) {
-    TRACED();
+    LOGI("read_sbc_header");
     int sbc_header_len = 12;  // without crc
     int pos = *offset;
 
@@ -448,7 +432,7 @@ class A2DPSinkClass : public A2DPCommon {
 
   int read_media_data_header(uint8_t *packet, int size, int *offset,
                              avdtp_media_packet_header_t *media_header) {
-    TRACED();
+    LOGI("read_media_data_header");
     int media_header_len = 12;  // without crc
     int pos = *offset;
 
@@ -483,9 +467,9 @@ class A2DPSinkClass : public A2DPCommon {
     return 1;
   }
 
-  void local_sink_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
+  virtual void avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
                                        uint8_t *packet, uint16_t size) {
-    TRACED();
+    LOGI("avrcp_packet_handler");
     UNUSED(channel);
     UNUSED(size);
     uint16_t local_cid;
@@ -545,10 +529,10 @@ class A2DPSinkClass : public A2DPCommon {
     }
   }
 
-  void local_sink_avrcp_target_packet_handler(uint8_t packet_type,
+  virtual void avrcp_target_packet_handler(uint8_t packet_type,
                                               uint16_t channel, uint8_t *packet,
                                               uint16_t size) {
-    TRACED();
+    LOGI("avrcp_target_packet_handler");
     UNUSED(channel);
     UNUSED(size);
 
@@ -593,9 +577,9 @@ class A2DPSinkClass : public A2DPCommon {
     }
   }
 
-  void local_sink_hci_packet_handler(uint8_t packet_type, uint16_t channel,
+  virtual void hci_packet_handler(uint8_t packet_type, uint16_t channel,
                                      uint8_t *packet, uint16_t size) {
-    TRACED();
+    LOGI("hci_packet_handler");
     UNUSED(channel);
     UNUSED(size);
     if (packet_type != HCI_EVENT_PACKET) return;
@@ -607,9 +591,9 @@ class A2DPSinkClass : public A2DPCommon {
     }
   }
 
-  void local_sink_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
+  virtual void a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
                                       uint8_t *packet, uint16_t size) {
-    TRACED();
+    LOGI("a2dp_packet_handler");
     UNUSED(channel);
     UNUSED(size);
     bd_addr_t address;
@@ -704,34 +688,34 @@ class A2DPSinkClass : public A2DPCommon {
 
 void sink_hci_packet_handler(uint8_t packet_type, uint16_t channel,
                              uint8_t *packet, uint16_t size) {
-  A2DPSink.local_sink_hci_packet_handler(packet_type, channel, packet, size);
+  A2DPSink.hci_packet_handler(packet_type, channel, packet, size);
 }
 
 void sink_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
                               uint8_t *packet, uint16_t event_size) {
-  A2DPSink.local_sink_a2dp_packet_handler(packet_type, channel, packet,
+  A2DPSink.a2dp_packet_handler(packet_type, channel, packet,
                                           event_size);
 }
 
 void sink_handle_l2cap_media_data_packet(uint8_t seid, uint8_t *packet,
                                          uint16_t size) {
-  A2DPSink.local_sink_handle_l2cap_media_data_packet(seid, packet, size);
+  A2DPSink.handle_l2cap_media_data_packet(seid, packet, size);
 }
 
 void sink_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
                                uint8_t *packet, uint16_t size) {
-  A2DPSink.local_sink_avrcp_packet_handler(packet_type, channel, packet, size);
+  A2DPSink.avrcp_packet_handler(packet_type, channel, packet, size);
 }
 
 void sink_avrcp_controller_packet_handler(uint8_t packet_type, uint16_t channel,
                                           uint8_t *packet, uint16_t size) {
-  A2DPSink.local_avrcp_controller_packet_handler(packet_type, channel, packet,
+  A2DPSink.avrcp_controller_packet_handler(packet_type, channel, packet,
                                                  size);
 }
 
 void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
                                       uint8_t *packet, uint16_t size) {
-  A2DPSink.local_sink_avrcp_target_packet_handler(packet_type, channel, packet,
+  A2DPSink.avrcp_target_packet_handler(packet_type, channel, packet,
                                                   size);
 }
 

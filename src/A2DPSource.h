@@ -97,15 +97,16 @@ class A2DPSourceClass : public A2DPCommon {
     return err = 0;
   }
 
-  /// Defines the encoder. Set a value if you do not intend to use the default SBC encoder!
+  /// Defines the encoder. Set a value if you do not intend to use the default
+  /// SBC encoder!
   void setEncoder(A2DPEncoder &enc) { p_encoder = &enc; }
 
   /// Resets the conder to use the SBC encoder
   void resetEncoder() { p_encoder = &encoder_sbc; }
 
   /// Provides access to the track information (to read or update)
-  avrcp_track_t &track(){ return track_info;}
- 
+  avrcp_track_t &track() { return track_info; }
+
  protected:
   friend void source_a2dp_audio_timeout_handler(btstack_timer_source_t *timer);
 
@@ -181,7 +182,6 @@ class A2DPSourceClass : public A2DPCommon {
   virtual int get_avrcp_cid() { return media_tracker.a2dp_cid; }
 
   A2DPEncoder &get_encoder() { return *p_encoder; }
-
 
   /**
    * @text The Listing MainConfiguration shows how to setup AD2P Source and
@@ -384,7 +384,7 @@ class A2DPSourceClass : public A2DPCommon {
     media_tracker.queue.readBytes(buffer + 1, available);
     buffer[0] = num_frames;
     int rc = avdtp_source_stream_send_media_payload_rtp(
-        media_tracker.a2dp_cid, media_tracker.local_seid, 0, buffer,
+        media_tracker.a2dp_cid, media_tracker.local_seid, 0, 0, buffer,
         available + 1);
 
     if (rc != ERROR_CODE_SUCCESS) {
@@ -412,7 +412,7 @@ class A2DPSourceClass : public A2DPCommon {
     return available;
   }
 
-  void local_a2dp_audio_timeout_handler(btstack_timer_source_t *timer) {
+  void a2dp_audio_timeout_handler(btstack_timer_source_t *timer) {
     TRACED();
     a2dp_media_sending_context_t *context =
         (a2dp_media_sending_context_t *)btstack_run_loop_get_timer_context(
@@ -464,8 +464,8 @@ class A2DPSourceClass : public A2DPCommon {
     scan_active = true;
   }
 
-  void local_hci_packet_handler(uint8_t packet_type, uint16_t channel,
-                                uint8_t *packet, uint16_t size) {
+  virtual void hci_packet_handler(uint8_t packet_type, uint16_t channel,
+                                        uint8_t *packet, uint16_t size) {
     TRACED();
     UNUSED(channel);
     UNUSED(size);
@@ -533,8 +533,8 @@ class A2DPSourceClass : public A2DPCommon {
     }
   }
 
-  void local_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
-                                 uint8_t *packet, uint16_t size) {
+  virtual void a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
+                                         uint8_t *packet, uint16_t size) {
     TRACED();
     UNUSED(channel);
     UNUSED(size);
@@ -665,8 +665,8 @@ class A2DPSourceClass : public A2DPCommon {
 
         play_info.status = AVRCP_PLAYBACK_STATUS_PLAYING;
         if (media_tracker.avrcp_cid) {
-          avrcp_target_set_now_playing_info(media_tracker.avrcp_cid, &track_info,
-                                            track_count);
+          avrcp_target_set_now_playing_info(media_tracker.avrcp_cid,
+                                            &track_info, track_count);
           avrcp_target_set_playback_status(media_tracker.avrcp_cid,
                                            AVRCP_PLAYBACK_STATUS_PLAYING);
         }
@@ -739,7 +739,7 @@ class A2DPSourceClass : public A2DPCommon {
     }
   }
 
-  void local_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
+  void avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
                                   uint8_t *packet, uint16_t size) {
     TRACED();
     UNUSED(channel);
@@ -801,8 +801,47 @@ class A2DPSourceClass : public A2DPCommon {
     }
   }
 
-  void local_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
-                                         uint8_t *packet, uint16_t size) {
+  virtual void avrcp_controller_packet_handler(uint8_t packet_type,
+                                               uint16_t channel,
+                                               uint8_t *packet, uint16_t size) {
+    UNUSED(channel);
+    UNUSED(size);
+
+    if (packet_type != HCI_EVENT_PACKET) return;
+    if (hci_event_packet_get_type(packet) != HCI_EVENT_AVRCP_META) return;
+    if (!media_tracker.avrcp_cid) return;
+
+    switch (packet[2]) {
+      case AVRCP_SUBEVENT_NOTIFICATION_VOLUME_CHANGED:
+        printf("AVRCP Controller: Notification Absolute Volume %d %%\n",
+               avrcp_subevent_notification_volume_changed_get_absolute_volume(
+                   packet) *
+                   100 / 127);
+        break;
+      case AVRCP_SUBEVENT_NOTIFICATION_EVENT_BATT_STATUS_CHANGED:
+        // see avrcp_battery_status_t
+        printf(
+            "AVRCP Controller: Notification Battery Status 0x%02x\n",
+            avrcp_subevent_notification_event_batt_status_changed_get_battery_status(
+                packet));
+        break;
+      case AVRCP_SUBEVENT_NOTIFICATION_STATE:
+        printf("AVRCP Controller: Notification %s - %s\n",
+               avrcp_event2str(
+                   avrcp_subevent_notification_state_get_event_id(packet)),
+               avrcp_subevent_notification_state_get_enabled(packet) != 0
+                   ? "enabled"
+                   : "disabled");
+        break;
+      default:
+        break;
+    }
+  }
+
+  virtual void avrcp_target_packet_handler(uint8_t packet_type,
+                                                 uint16_t channel,
+                                                 uint8_t *packet,
+                                                 uint16_t size) {
     TRACED();
     UNUSED(channel);
     UNUSED(size);
@@ -888,33 +927,33 @@ class A2DPSourceClass : public A2DPCommon {
 
 void source_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
                                 uint8_t *event, uint16_t event_size) {
-  A2DPSource.local_a2dp_packet_handler(packet_type, channel, event, event_size);
+  A2DPSource.a2dp_packet_handler(packet_type, channel, event, event_size);
 }
 
 void source_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
                                         uint8_t *packet, uint16_t size) {
-  A2DPSource.local_avrcp_target_packet_handler(packet_type, channel, packet,
+  A2DPSource.avrcp_target_packet_handler(packet_type, channel, packet,
                                                size);
 }
 
 void source_hci_packet_handler(uint8_t packet_type, uint16_t channel,
                                uint8_t *packet, uint16_t size) {
-  A2DPSource.local_hci_packet_handler(packet_type, channel, packet, size);
+  A2DPSource.hci_packet_handler(packet_type, channel, packet, size);
 }
 
 void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
                                  uint8_t *packet, uint16_t size) {
-  A2DPSource.local_avrcp_packet_handler(packet_type, channel, packet, size);
+  A2DPSource.avrcp_packet_handler(packet_type, channel, packet, size);
 }
 
 void source_a2dp_audio_timeout_handler(btstack_timer_source_t *timer) {
-  A2DPSource.local_a2dp_audio_timeout_handler(timer);
+  A2DPSource.a2dp_audio_timeout_handler(timer);
 }
 
 void source_avrcp_controller_packet_handler(uint8_t packet_type,
                                             uint16_t channel, uint8_t *packet,
                                             uint16_t size) {
-  A2DPSource.local_avrcp_controller_packet_handler(packet_type, channel, packet,
+  A2DPSource.avrcp_controller_packet_handler(packet_type, channel, packet,
                                                    size);
 }
 

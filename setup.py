@@ -140,6 +140,8 @@ if res.exit==0:
     # fix compile errors
     remove_dir("src/btstack/3rd-party/micro-eec/test")
     remove_dir("src/btstack/mesh")
+    remove_dir("src/btstack/mesh")
+    remove_dir("src/le-audio")
     print("setup completed")
 else:
     print("Could not execute git command")

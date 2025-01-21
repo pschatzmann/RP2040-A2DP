@@ -1,6 +1,6 @@
 #pragma once
 #include "AudioTools.h"
-#include "AudioCodecs/CodecSBC.h"
+#include "AudioTools/AudioCodecs/CodecSBC.h"
 
 namespace btstack_a2dp {
 
@@ -45,7 +45,7 @@ class A2DPEncoder {
   virtual AudioEncoder &encoder() = 0;
   virtual int frameLengthEncoded() = 0;
   virtual int frameLengthDecoded() = 0;
-  virtual AudioBaseInfo audioInfo() = 0;
+  virtual AudioInfo audioInfo() = 0;
   virtual avdtp_media_codec_type_t codecType() = 0;
 };
 
@@ -62,7 +62,7 @@ class A2DPDecoder {
   virtual int codecCapabilitiesSize() = 0;
   virtual AudioDecoder &decoder() = 0;
   virtual void setValues(uint8_t *packet, uint16_t size) = 0;
-  virtual AudioBaseInfo audioInfo() = 0;
+  virtual AudioInfo audioInfo() = 0;
   virtual avdtp_media_codec_type_t codecType() = 0;
   virtual bool isReconfigure() = 0;
 };
@@ -157,10 +157,10 @@ class A2DPEncoderSBC : public A2DPEncoder {
     return sizeof(media_sbc_codec_capabilities);
   }
   AudioEncoder &encoder() override { return sbc_codec; }
-  int frameLengthEncoded() override { return sbc_codec.frameLength(); };
-  int frameLengthDecoded() override { return sbc_codec.codeSize(); };
-  AudioBaseInfo audioInfo() override {
-    AudioBaseInfo info;
+  int frameLengthEncoded() override { return sbc_codec.bytesCompressed(); };
+  int frameLengthDecoded() override { return sbc_codec.bytesUncompressed(); };
+  AudioInfo audioInfo() override {
+    AudioInfo info;
     info.bits_per_sample = 16;
     info.channels = sbc_config.num_channels;
     info.sample_rate = sbc_config.sampling_frequency;
@@ -260,8 +260,8 @@ class A2DPDecoderSBC : public A2DPDecoder {
     dump();
   }
 
-  AudioBaseInfo audioInfo() override {
-    AudioBaseInfo info;
+  AudioInfo audioInfo() override {
+    AudioInfo info;
     info.bits_per_sample = 16;
     info.channels = sbc_config.num_channels;
     info.sample_rate = sbc_config.sampling_frequency;
