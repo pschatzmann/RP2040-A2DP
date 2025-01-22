@@ -129,8 +129,7 @@ class A2DPSinkClass : public A2DPCommon {
     a2dp_name = name;
 
     LOGI("Starting BTstack ...\n");
-    int rc = a2dp_and_avrcp_setup();
-    if (rc != 0) {
+    if (!a2dp_and_avrcp_setup()) {
       LOGE("a2dp_and_avrcp_setup");
       return false;
     }
@@ -206,10 +205,7 @@ class A2DPSinkClass : public A2DPCommon {
   A2DPDecoderSBC decoder_sbc;
   A2DPDecoder *p_decoder = &decoder_sbc;
   const char *a2dp_name = "rp2040";
-  AdapterAudioStreamToAudioOutput out_print;
   EncodedAudioOutput dec_stream;
-  RingBuffer<uint8_t> ring_buffer{(OPTIMAL_FRAMES_MAX + ADDITIONAL_FRAMES) *
-                                  MAX_SBC_FRAME_SIZE};
   btstack_packet_callback_registration_t hci_event_callback_registration;
   uint8_t sdp_avdtp_sink_service_buffer[150];
   uint8_t sdp_avrcp_target_service_buffer[150];
@@ -218,9 +214,7 @@ class A2DPSinkClass : public A2DPCommon {
   unsigned int sbc_frame_size;
   bool media_initialized = false;
   bool audio_stream_started = false;
-  int request_frames;
   avrcp_battery_status_t battery_status = AVRCP_BATTERY_STATUS_WARNING;
-  int16_t *request_buffer = nullptr;
 
   // local methods
   int16_t get_max_input_amplitude() override { return MAX_AMPLITUDE_RECEIVED; }
@@ -256,7 +250,7 @@ class A2DPSinkClass : public A2DPCommon {
    * @text Note, currently only the SBC codec is supported.
    */
 
-  int a2dp_and_avrcp_setup(void) {
+  bool a2dp_and_avrcp_setup(void) {
     LOGI("a2dp_and_avrcp_setup");
     l2cap_init();
     // Initialize SDP
@@ -371,12 +365,12 @@ class A2DPSinkClass : public A2DPCommon {
     hci_add_event_handler(&hci_event_callback_registration);
 #endif
     is_active = true;
-    return 0;
+    return true;
   }
 
-  int media_processing_init() {
+  bool media_processing_init() {
     LOGI("media_processing_init");
-    if (media_initialized) return 0;
+    if (media_initialized) return false;
 
     auto &dec = get_decoder();
     dec.begin();
@@ -397,7 +391,7 @@ class A2DPSinkClass : public A2DPCommon {
 
     audio_stream_started = false;
     media_initialized = true;
-    return 0;
+    return true;
   }
 
   void media_processing_start(void) {
@@ -451,7 +445,7 @@ class A2DPSinkClass : public A2DPCommon {
     dec_stream.write(packet + pos, size - pos);
   }
 
-  int read_sbc_header(uint8_t *packet, int size, int *offset,
+  bool read_sbc_header(uint8_t *packet, int size, int *offset,
                       avdtp_sbc_codec_header_t *sbc_header) {
     LOGI("read_sbc_header");
     int sbc_header_len = 12;  // without crc
@@ -460,7 +454,7 @@ class A2DPSinkClass : public A2DPCommon {
     if (size - pos < sbc_header_len) {
       LOGW("Not enough data to read SBC header, expected %d, received %d",
            sbc_header_len, size - pos);
-      return 0;
+      return false;
     }
 
     sbc_header->fragmentation = get_bit16(packet[pos], 7);
@@ -469,10 +463,10 @@ class A2DPSinkClass : public A2DPCommon {
     sbc_header->num_frames = packet[pos] & 0x0f;
     pos++;
     *offset = pos;
-    return 1;
+    return true;
   }
 
-  int read_media_data_header(uint8_t *packet, int size, int *offset,
+  bool read_media_data_header(uint8_t *packet, int size, int *offset,
                              avdtp_media_packet_header_t *media_header) {
     LOGI("read_media_data_header");
     int media_header_len = 12;  // without crc
@@ -484,7 +478,7 @@ class A2DPSinkClass : public A2DPCommon {
           "received "
           "%d",
           media_header_len, size - pos);
-      return 0;
+      return false;
     }
 
     media_header->version = packet[pos] & 0x03;
@@ -506,7 +500,7 @@ class A2DPSinkClass : public A2DPCommon {
     media_header->synchronization_source = big_endian_read_32(packet, pos);
     pos += 4;
     *offset = pos;
-    return 1;
+    return true;
   }
 
   virtual void avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
@@ -517,7 +511,6 @@ class A2DPSinkClass : public A2DPCommon {
     uint16_t local_cid;
     uint8_t status;
     bd_addr_t address;
-
     a2dp_sink_arduino_avrcp_connection_t *connection =
         &a2dp_sink_arduino_avrcp_connection;
 
@@ -538,6 +531,7 @@ class A2DPSinkClass : public A2DPCommon {
         avrcp_subevent_connection_established_get_bd_addr(packet, address);
         LOGI("AVRCP: Connected to %s, cid 0x%02x\n", bd_addr_to_str(address),
              connection->avrcp_cid);
+
 
         avrcp_target_support_event(connection->avrcp_cid,
                                    AVRCP_NOTIFICATION_EVENT_VOLUME_CHANGED);
