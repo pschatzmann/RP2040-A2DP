@@ -66,6 +66,27 @@
 
 namespace btstack_a2dp {
 
+// -- Declare Source Callback functions
+
+extern "C" void source_a2dp_audio_timeout_handler(btstack_timer_source_t *timer);
+
+extern "C" void source_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
+                                uint8_t *event, uint16_t event_size);
+
+extern "C" void source_a2dp_configure_sample_rate(int sample_rate);
+extern "C" void source_avrcp_controller_packet_handler(uint8_t packet_type,
+                                            uint16_t channel, uint8_t *packet,
+                                            uint16_t size);
+extern "C" void source_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
+                                        uint8_t *packet, uint16_t size);
+
+extern "C" void source_hci_packet_handler(uint8_t packet_type, uint16_t channel,
+                               uint8_t *packet, uint16_t size);
+
+extern "C" void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
+                                 uint8_t *packet, uint16_t size);
+
+
 /**
  * @brief A2DPSource for the RP2040
  * @author Phil Schatzmann
@@ -560,18 +581,11 @@ class A2DPSourceClass : public A2DPCommon {
 
         if (status != ERROR_CODE_SUCCESS) {
           LOGE(
-              "A2DP Source: Connection failed, status 0x%02x, cid 0x%02x, "
-              "a2dp_cid 0x%02x",
-              status, cid, media_tracker.a2dp_cid);
-          media_tracker.a2dp_cid = 0;
+              "A2DP Source: Connection failed, status 0x%02x, cid 0x%02x", 
+              status, cid);
           break;
         }
-        media_tracker.a2dp_cid = cid;
-        LOGI(
-            "A2DP Source: Connected to address %s, a2dp cid 0x%02x, local "
-            "seid 0x%02x.",
-            bd_addr_to_str(address), media_tracker.a2dp_cid,
-            media_tracker.local_seid);
+        LOGI("A2DP Source: Connected to address %s", bd_addr_to_str(address));
         break;
 
       case A2DP_SUBEVENT_SIGNALING_MEDIA_CODEC_SBC_CONFIGURATION: {

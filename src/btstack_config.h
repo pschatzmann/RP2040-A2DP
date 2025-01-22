@@ -1,59 +1,75 @@
-
-// btstack_config.h for most tests
-//
-
-#ifndef BTSTACK_CONFIG_H
-#define BTSTACK_CONFIG_H
-
-// Port related features
-#define HAVE_BTSTACK_STDIN
-#define HAVE_MALLOC
-//#define HAVE_POSIX_FILE_IO
-//#define HAVE_POSIX_TIME
-// We don't give btstack a malloc, so use a fixed-size ATT DB.
-//#define MAX_ATT_DB_SIZE 1024*2
-
-
-#define HAVE_EMBEDDED_TIME_MS
-
+#pragma once
 
 // BTstack features that can be enabled
-#ifndef ENABLE_BLE
-#define ENABLE_BLE
-#endif
-#ifndef ENABLE_CLASSIC
-#define ENABLE_CLASSIC
-#endif
-#define ENABLE_GATT_CLIENT_PAIRING
-#define ENABLE_LOG_ERROR
 #define ENABLE_LOG_INFO
+#define ENABLE_LOG_DEBUG
+#define ENABLE_LOG_ERROR
 #define ENABLE_PRINTF_HEXDUMP
-#define ENABLE_SDP_DES_DUMP
-#define ENABLE_SDP_EXTRA_QUERIES
-#define AVRCP_BROWSING_ENABLED
+#define ENABLE_SCO_OVER_HCI
 
-// #define ENABLE_LE_SECURE_CONNECTIONS
+#ifdef ENABLE_CLASSIC
 #define ENABLE_L2CAP_ENHANCED_RETRANSMISSION_MODE
-#define ENABLE_LE_CENTRAL
+#endif
+
+#ifdef ENABLE_BLE
+#define ENABLE_L2CAP_LE_CREDIT_BASED_FLOW_CONTROL_MODE
 #define ENABLE_LE_PERIPHERAL
-#define ENABLE_LE_SIGNED_WRITE
-//#define ENABLE_SDP_EXTRA_QUERIES
-//#define ENABLE_AVCTP_FRAGMENTATION
+#define ENABLE_LE_CENTRAL
+#endif
 
 // BTstack configuration. buffers, sizes, ...
-#define HCI_ACL_PAYLOAD_SIZE 1024
-#define HCI_INCOMING_PRE_BUFFER_SIZE 6
-#define NVM_NUM_DEVICE_DB_ENTRIES 4
-#define NVM_NUM_LINK_KEYS 2
+#define HCI_OUTGOING_PRE_BUFFER_SIZE 4
+#define HCI_ACL_PAYLOAD_SIZE (1691 + 4)
+#define HCI_ACL_CHUNK_SIZE_ALIGNMENT 4
+#define MAX_NR_AVDTP_CONNECTIONS 1
+#define MAX_NR_AVDTP_STREAM_ENDPOINTS 1
+#define MAX_NR_AVRCP_CONNECTIONS 2
+#define MAX_NR_BNEP_CHANNELS 1
+#define MAX_NR_BNEP_SERVICES 1
+#define MAX_NR_BTSTACK_LINK_KEY_DB_MEMORY_ENTRIES  2
+#define MAX_NR_GATT_CLIENTS 1
+#define MAX_NR_HCI_CONNECTIONS 2
+#define MAX_NR_HID_HOST_CONNECTIONS 1
+#define MAX_NR_HIDS_CLIENTS 1
+#define MAX_NR_HFP_CONNECTIONS 1
+#define MAX_NR_L2CAP_CHANNELS  4
+#define MAX_NR_L2CAP_SERVICES  3
+#define MAX_NR_RFCOMM_CHANNELS 1
+#define MAX_NR_RFCOMM_MULTIPLEXERS 1
+#define MAX_NR_RFCOMM_SERVICES 1
+#define MAX_NR_SERVICE_RECORD_ITEMS 4
+#define MAX_NR_SM_LOOKUP_ENTRIES 3
+#define MAX_NR_WHITELIST_ENTRIES 16
+#define MAX_NR_LE_DEVICE_DB_ENTRIES 16
 
-#define SDP_SERVICE_NAME_LEN 20
+// Limit number of ACL/SCO Buffer to use by stack to avoid cyw43 shared bus overrun
+#define MAX_NR_CONTROLLER_ACL_BUFFERS 3
+#define MAX_NR_CONTROLLER_SCO_PACKETS 3
 
-// #define MAX_NR_MESH_SUBNETS            2
-// #define MAX_NR_MESH_TRANSPORT_KEYS    16
-// #define MAX_NR_MESH_VIRTUAL_ADDRESSES 16
+// Enable and configure HCI Controller to Host Flow Control to avoid cyw43 shared bus overrun
+#define ENABLE_HCI_CONTROLLER_TO_HOST_FLOW_CONTROL
+#define HCI_HOST_ACL_PACKET_LEN 1024
+#define HCI_HOST_ACL_PACKET_NUM 3
+#define HCI_HOST_SCO_PACKET_LEN 120
+#define HCI_HOST_SCO_PACKET_NUM 3
 
-// // allow for one NetKey update
-// #define MAX_NR_MESH_NETWORK_KEYS      (MAX_NR_MESH_SUBNETS+1)
-// #define MESH_DEVICE_KEY_INDEX 0xffff
+// Link Key DB and LE Device DB using TLV on top of Flash Sector interface
+#define NVM_NUM_DEVICE_DB_ENTRIES 16
+#define NVM_NUM_LINK_KEYS 16
 
-#endif
+// We don't give btstack a malloc, so use a fixed-size ATT DB.
+#define MAX_ATT_DB_SIZE 512
+
+// BTstack HAL configuration
+#define HAVE_EMBEDDED_TIME_MS
+
+// map btstack_assert onto Pico SDK assert()
+#define HAVE_ASSERT
+
+// Some USB dongles take longer to respond to HCI reset (e.g. BCM20702A).
+#define HCI_RESET_RESEND_TIMEOUT_MS 1000
+
+#define ENABLE_SOFTWARE_AES128
+#define ENABLE_MICRO_ECC_FOR_LE_SECURE_CONNECTIONS
+
+#undef HAVE_BTSTACK_STDIN

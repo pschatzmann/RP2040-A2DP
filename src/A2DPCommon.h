@@ -1,23 +1,29 @@
 #pragma once
 #include "A2DPConfig.h"
 
+#if !defined(ENABLE_CLASSIC) 
+#  error Bluetooth must be enabled
+#endif
+
 #if defined(ARDUINO_ARCH_MBED_RP2040)
-#define RP2040_MBED
+#  define RP2040_MBED
 #elif defined(ARDUINO_ARCH_RP2040)
-#define RP2040_HOWER
+#  define RP2040_HOWER
 #endif
 
 #if USE_LOCAL_BTSTACK
-#include "btstack/bluetooth.h"
-#include "btstack/btstack.h"
-#include "btstack/btstack_defines.h"
+#  include "btstack/bluetooth.h"
+#  include "btstack/btstack.h"
+#  include "btstack/btstack_defines.h"
 #else
-#include "bluetooth.h"
-#include "btstack.h"
-#include "btstack_defines.h"
+#  include "bluetooth.h"
+#  include "btstack.h"
+#  include "btstack_defines.h"
 #endif
+
 #ifdef RP2040_HOWER
-#include <pico/cyw43_arch.h>
+#  include <pico/cyw43_arch.h>
+#  include <BluetoothHCI.h>
 #endif
 
 #include "AudioTools.h"
@@ -42,51 +48,6 @@ enum MetadataType {
   MDSongPos
 };
 
-// -- Declare Sink Callback functions
-void sink_hci_packet_handler(uint8_t packet_type, uint16_t channel,
-                             uint8_t *packet, uint16_t size);
-void sink_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
-                              uint8_t *packet, uint16_t event_size);
-void sink_handle_l2cap_media_data_packet(uint8_t seid, uint8_t *packet,
-                                         uint16_t size);
-void sink_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
-                               uint8_t *packet, uint16_t size);
-void sink_avrcp_controller_packet_handler(uint8_t packet_type, uint16_t channel,
-                                          uint8_t *packet, uint16_t size);
-void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
-                                      uint8_t *packet, uint16_t size);
-
-void sink_handle_l2cap_media_data_packet(uint8_t seid, uint8_t *packet,
-                                         uint16_t size);
-void sink_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
-                               uint8_t *packet, uint16_t size);
-void sink_avrcp_controller_packet_handler(uint8_t packet_type, uint16_t channel,
-                                          uint8_t *packet, uint16_t size);
-
-void sink_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
-                                      uint8_t *packet, uint16_t size);
-
-// void sink_playback_handler(int16_t *buffer, uint16_t num_audio_frames);
-
-// -- Declare Source Callback functions
-
-void source_a2dp_audio_timeout_handler(btstack_timer_source_t *timer);
-
-void source_a2dp_packet_handler(uint8_t packet_type, uint16_t channel,
-                                uint8_t *event, uint16_t event_size);
-
-void source_a2dp_configure_sample_rate(int sample_rate);
-void source_avrcp_controller_packet_handler(uint8_t packet_type,
-                                            uint16_t channel, uint8_t *packet,
-                                            uint16_t size);
-void source_avrcp_target_packet_handler(uint8_t packet_type, uint16_t channel,
-                                        uint8_t *packet, uint16_t size);
-
-void source_hci_packet_handler(uint8_t packet_type, uint16_t channel,
-                               uint8_t *packet, uint16_t size);
-
-void source_avrcp_packet_handler(uint8_t packet_type, uint16_t channel,
-                                 uint8_t *packet, uint16_t size);
 
 /**
  * @brief Common A2DP functionality
@@ -202,9 +163,15 @@ class A2DPCommon {
   }
 #endif
 
+ operator bool() { return is_active; }
+
  protected:
+#if defined(RP2040_HOWER)
+  BluetoothHCI _hci;
+#endif
   VolumeStream volume_stream;
   int volume_percentage = 100;
+  bool is_active = false;
   bool is_playing = false;
   bool is_ble_enabled = false;
   void (*metadata_callback)(MetadataType type, const char *data,
